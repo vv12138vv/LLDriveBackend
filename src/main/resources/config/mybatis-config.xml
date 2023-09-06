@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!--    配置运行环境-->
+    <environments default="dev">
+        <environment id="dev">
+<!--            配置JDBC事务管理-->
+            <transactionManager type="JDBC"></transactionManager>
+<!--            配置数据源连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://124.223.65.182:3306/LLDrive"/>
+                <property name="username" value="LLDrive"/>
+                <property name="password" value="LLDrive"/>
+            </dataSource>
+        </environment>
+    </environments>
+</configuration>
