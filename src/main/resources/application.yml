@@ -10,14 +10,14 @@ spring:
     datasource:
       type: com.alibaba.druid.pool.DruidDataSource
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://124.223.65.182:3306/LLDrive
-      username: LLDrive
-      password: LLDrive
+      url:
+      username:
+      password:
 
     mail:
-      host: smtp.163.com
-      username: LLDrive@163.com
-      password: STQNFPPOAXQFJKFF
-      protocol: smtp
+      host:
+      username:
+      password:
+      protocol:
 server:
   port: 8848
