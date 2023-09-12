@@ -22,7 +22,7 @@ public class UserController {
 
     @GetMapping("/register")
     public CommonResp sendRegisterCode(@Email String email){
-        System.out.println(email);
+        userService.sendEmailCode(email);
         return new CommonResp();
     }
     @PostMapping("/register")
