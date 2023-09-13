@@ -2,5 +2,5 @@ package com.lldrive.service;
 
 public interface EmailService {
 
-    void sendSimpleEmail(String to,String content);
+    void sendEmail(String to,String subject,String content);
 }

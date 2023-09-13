@@ -28,4 +28,9 @@ public class UserMapperTest {
         user.setAdmin(false);
         userMapper.insert(user);
     }
+    @Test
+    public void selectUser(){
+        User user=userMapper.selectByUsername("tes");
+        System.out.println(user);
+    }
 }

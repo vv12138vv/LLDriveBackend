@@ -8,15 +8,11 @@ import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
 @Data
 public class RegisterReq {
-
-    @Length(min = 4,max=24,message = "用户名长度应当为4-24位")
+    @Length(min = 4,max=24,message = "The username length should be between 6-24")
     private String username;
     @Email
-    @NotBlank
-    @NotNull
     private String email;
     @NotBlank
-    @Length(min=6,max=24,message = "密码长度应当为6-24位")
+    @Length(min=6,max=24,message = "The password length should be between 6-24")
     private String password;
-    private String token;
 }

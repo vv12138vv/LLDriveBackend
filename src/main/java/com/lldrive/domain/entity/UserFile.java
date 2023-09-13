@@ -1,5 +1,6 @@
 package com.lldrive.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -28,9 +29,9 @@ public class UserFile {
     private String repoId;
     @TableField(value = "is_deleted")
     private boolean deleted;
-    @TableField(value = "create_time")
+    @TableField(value = "create_time",fill= FieldFill.INSERT)
     private Timestamp createTime;
-    @TableField(value = "update_time",update = "now()")
+    @TableField(value = "update_time",fill=FieldFill.INSERT_UPDATE)
     private Timestamp updateTime;
     @TableField(value = "delete_time")
     private Timestamp deleteTime;
