@@ -12,4 +12,6 @@ public interface UserService {
     void sendEmailCode(String email);
 
     CommonResp login(LoginReq loginReq);
+
+    CommonResp getUserInfo(String token);
 }

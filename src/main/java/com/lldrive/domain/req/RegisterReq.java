@@ -15,4 +15,6 @@ public class RegisterReq {
     @NotBlank
     @Length(min=6,max=24,message = "The password length should be between 6-24")
     private String password;
+    @NotBlank
+    private String code;
 }

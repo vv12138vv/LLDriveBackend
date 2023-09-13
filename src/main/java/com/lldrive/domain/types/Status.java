@@ -8,6 +8,7 @@ public enum Status{
     EMAIL_EXIST(4001,"The email already exists"),
     USERNAME_NOT_EXIST(4003,"The username does not exist"),
     INCORRECT_PASSWORD(4004,"Incorrect password"),
+    LOGIN_EXPIRED(4005,"The login session has expired"),
     SUCCESS(5000,"SUCCESS");
 
     private Integer statusCode;

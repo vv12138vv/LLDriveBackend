@@ -3,7 +3,6 @@ package com.lldrive.controller;
 import com.lldrive.domain.req.LoginReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.req.RegisterReq;
-import com.lldrive.domain.resp.RegisterResp;
 import com.lldrive.domain.types.Status;
 import com.lldrive.service.UserService;
 import jakarta.validation.constraints.Email;
@@ -25,18 +24,23 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/register")
-    public CommonResp<Map<String,String>> sendRegisterCode(@Email String email){
+    public CommonResp sendRegisterCode(@Email String email){
         userService.sendEmailCode(email);
-        return null;
+        return new CommonResp(Status.SUCCESS);
     }
     @PostMapping("/register")
-    public RegisterResp registerUser(@Validated @RequestBody RegisterReq registerReq){
-
-        return new RegisterResp();
+    public CommonResp registerUser(@Validated @RequestBody RegisterReq registerReq){
+        System.out.println(registerReq);
+        return new CommonResp(Status.SUCCESS);
     }
 
     @PostMapping("/login")
     public  CommonResp loginUser(@Validated @RequestBody LoginReq loginReq){
         return userService.login(loginReq);
+    }
+
+    @GetMapping("/info")
+    public CommonResp userInfo(@RequestParam("token")String token){
+        return userService.getUserInfo(token);
     }
 }
