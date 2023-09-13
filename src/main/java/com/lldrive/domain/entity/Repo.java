@@ -1,9 +1,6 @@
 package com.lldrive.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -12,7 +9,7 @@ import java.sql.Timestamp;
 @TableName("repos")
 public class Repo {
     @TableId(value = "id",type = IdType.AUTO)
-    private long id;
+    private Integer id;
     @TableField(value = "repo_id")
     private String repoId;
     @TableField(value = "user_id")
@@ -21,9 +18,9 @@ public class Repo {
     private double maxCapacity;
     @TableField(value = "cur_capacity")
     private double curCapacity;
-    @TableField(value = "create_time")
+    @TableField(value = "create_time",fill= FieldFill.INSERT)
     private Timestamp createTime;
-    @TableField(value="update_time",update = "now")
+    @TableField(value="update_time",fill= FieldFill.INSERT_UPDATE)
     private Timestamp updateTime;
     @TableField(value = "delete_time")
     private Timestamp deleteTime;

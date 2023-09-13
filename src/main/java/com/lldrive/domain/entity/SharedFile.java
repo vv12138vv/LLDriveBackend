@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @TableName("shared_files")
 public class SharedFile {
     @TableId(value = "id")
-    private long id;
+    private Integer id;
     @TableField(value = "shared_id")
     private String sharedId;
     @TableField(value="user_file_id")
