@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @TableName("user_files")
 public class UserFile {
     @TableId(value ="id")
-    private long id;
+    private Integer id;
     @TableField(value = "user_file_id")
     private String userFileId;
     @TableField(value = "is_dir")

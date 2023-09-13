@@ -1,7 +1,10 @@
 package com.lldrive.service.impl;
 
+import com.lldrive.domain.resp.CommonResp;
+import com.lldrive.domain.types.Status;
 import com.lldrive.service.EmailService;
 import jakarta.annotation.Resource;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,17 +20,19 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender sender;
     @Override
-    public void sendEmail(String to, String subject,String content) {
+    public CommonResp sendEmail(String to, String subject,String content){
         MimeMessage message = sender.createMimeMessage();
-//        Try.run(()->{
-//            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-//            helper.setTo(to);
-//            helper.setFrom(from);
-//            helper.setSubject(subject);
-//            helper.setText(content, true);
-//            sender.send(message);
-//            log.info("邮件发送成功: from[{}], to[{}], subject[{}], content[{}]", from, to, subject, content);
-//        });
-
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(to);
+            helper.setFrom(from);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            sender.send(message);
+            return new CommonResp(Status.SUCCESS);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new CommonResp(Status.SYSTEM_ERROR);
     }
 }

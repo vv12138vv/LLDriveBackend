@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @TableName("repos")
 public class Repo {
     @TableId(value = "id",type = IdType.AUTO)
-    private long id;
+    private Integer id;
     @TableField(value = "repo_id")
     private String repoId;
     @TableField(value = "user_id")

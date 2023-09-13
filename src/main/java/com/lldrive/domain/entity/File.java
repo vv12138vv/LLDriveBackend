@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @TableName("files")
 public class File {
     @TableId(value = "id",type = IdType.AUTO)
-    private long id;
+    private Integer id;
     @TableField(value = "file_id")
     private String fileId;
     @TableField(value="hash")

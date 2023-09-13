@@ -31,6 +31,11 @@ public class UserMapperTest {
     @Test
     public void selectUser(){
         User user=userMapper.selectByUsername("tes");
+        User user1=userMapper.selectByEmail("test@test.com");
+        if(user1==null){
+            System.out.println(true);
+        }
         System.out.println(user);
     }
+
 }
