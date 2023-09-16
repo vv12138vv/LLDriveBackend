@@ -15,9 +15,9 @@ public class Repo {
     @TableField(value = "user_id")
     private String userId;
     @TableField(value = "max_capacity")
-    private double maxCapacity;
+    private Long maxCapacity;
     @TableField(value = "cur_capacity")
-    private double curCapacity;
+    private Long curCapacity;
     @TableField(value = "create_time",fill= FieldFill.INSERT)
     private Timestamp createTime;
     @TableField(value="update_time",fill= FieldFill.INSERT_UPDATE)

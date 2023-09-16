@@ -6,5 +6,6 @@ public class Const {
 
     public static final int UUID_LENGTH=32;
 
+    public static final int FILE_NAME_LENGTH=32;
     public static final int LOGIN_VALID_TIME=15;
 }

@@ -12,6 +12,9 @@ public enum Status{
     INCORRECT_PASSWORD(4004,"Incorrect password"),
     LOGIN_EXPIRED(4005,"The login session has expired"),
     INCORRECT_CODE(4006,"Incorrect code"),
+    INVALID_EXTENSION(4007,"Invalid extension"),
+    ALREADY_HAVE_FILE(4008,"The user alread have the file"),
+    FILE_EXIST(4009,"Consider use fastUpload"),
     SUCCESS(5000,"SUCCESS");
 
     private Integer statusCode;

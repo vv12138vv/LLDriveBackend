@@ -18,11 +18,11 @@ public class File {
     @TableField(value = "type")
     private String type;
     @TableField(value = "size")
-    private double size;
+    private Long size;
     @TableField(value ="path")
     private String path;
     @TableField(value = "count")
-    private long count;
+    private Long count;
     @TableField(value = "create_time",fill= FieldFill.INSERT)
     private Timestamp createTime;
     @TableField(value = "update_time",fill= FieldFill.INSERT_UPDATE)
