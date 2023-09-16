@@ -1,10 +1,12 @@
 package com.lldrive.controller;
 
+import com.lldrive.domain.entity.User;
 import com.lldrive.domain.req.LoginReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.req.RegisterReq;
 import com.lldrive.domain.types.Status;
 import com.lldrive.service.EmailService;
+import com.lldrive.service.RepoService;
 import com.lldrive.service.UserService;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,14 +25,24 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private RepoService repoService;
     @GetMapping("/register")
     public CommonResp sendRegisterCode(@Email String email){
         return userService.sendEmailCode(email);
     }
     @PostMapping("/register")
     public CommonResp registerUser(@Validated @RequestBody RegisterReq registerReq){
-        return userService.register(registerReq);
+        CommonResp registerResp=userService.register(registerReq);
+        if(registerResp.getData()==null){
+            return registerResp;
+        }
+        User user=(User) registerResp.getData();
+        CommonResp repoResp=repoService.createRepo(user.getUserId(),user.getRepoId());
+        if(repoResp.getData()==null){
+            return repoResp;
+        }
+        return new CommonResp(Status.SUCCESS);
     }
 
     @PostMapping("/login")

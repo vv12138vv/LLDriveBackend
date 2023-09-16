@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.lldrive.Utils.UUIDUtil;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -35,5 +36,6 @@ public class UserFile {
     private Timestamp updateTime;
     @TableField(value = "delete_time")
     private Timestamp deleteTime;
+
 
 }

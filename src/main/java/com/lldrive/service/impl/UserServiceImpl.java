@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
         User user=new User(registerReq);
         int res=userMapper.insert(user);
         if(res==1){
-            return new CommonResp(Status.SUCCESS);
+            return new CommonResp(Status.SUCCESS,user);
         }
         return new CommonResp(Status.SYSTEM_ERROR);
     }
