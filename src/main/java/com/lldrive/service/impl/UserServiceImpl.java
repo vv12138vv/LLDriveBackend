@@ -114,4 +114,13 @@ public class UserServiceImpl implements UserService {
         redisTemplate.delete(token);
         return new CommonResp(Status.SUCCESS);
     }
+
+    @Override
+    public CommonResp findUser(String username){
+        User user=userMapper.selectByUsername(username);
+        if(user==null){
+            return new CommonResp(Status.USERNAME_NOT_EXIST);
+        }
+        return new CommonResp(Status.SUCCESS,user);
+    }
 }

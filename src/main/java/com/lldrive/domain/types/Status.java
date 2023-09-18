@@ -15,6 +15,7 @@ public enum Status{
     INVALID_EXTENSION(4007,"Invalid extension"),
     ALREADY_HAVE_FILE(4008,"The user alread have the file"),
     FILE_EXIST(4009,"Consider use fastUpload"),
+    FILE_NOT_EXIST(4010,"The file does not exist"),
     SUCCESS(5000,"SUCCESS");
 
     private Integer statusCode;

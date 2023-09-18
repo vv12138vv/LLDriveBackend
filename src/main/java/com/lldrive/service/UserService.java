@@ -14,4 +14,6 @@ public interface UserService {
     CommonResp sendEmailCode(String email);
     CommonResp getUserInfo(String token);
     CommonResp logout(String token);
+
+    CommonResp findUser(String username);
 }

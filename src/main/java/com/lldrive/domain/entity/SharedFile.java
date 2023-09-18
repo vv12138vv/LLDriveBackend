@@ -1,5 +1,6 @@
 package com.lldrive.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -10,7 +11,7 @@ import java.sql.Timestamp;
 @Data
 @TableName("shared_files")
 public class SharedFile {
-    @TableId(value = "id")
+    @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
     @TableField(value = "shared_id")
     private String sharedId;
