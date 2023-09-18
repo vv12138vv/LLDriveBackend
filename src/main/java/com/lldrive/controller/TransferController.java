@@ -9,13 +9,16 @@ import com.lldrive.mapper.UserFileMapper;
 import com.lldrive.service.TransferService;
 import com.lldrive.service.UserFileService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Objects;
 
 @RestController()
@@ -45,5 +48,16 @@ public class TransferController {
     public CommonResp fastUpload(UploadFileReq uploadFileReq){
         return transferService.fastUpload(uploadFileReq);
     }
+
+//    @RequestMapping("/download")
+//    public CommonResp download(HttpServletResponse resp,String fileName){
+//         resp.setContentType("application/force-download");
+//         resp.setCharacterEncoding("utf-8");
+//         resp.setHeader("Content-Disposition","attachment;filename="+fileName);
+//
+//         byte[]readBytes= FileCopyUtils.copyToByteArray();
+//        OutputStream os=resp.getOutputStream();
+//        os.write();
+//    }
 
 }

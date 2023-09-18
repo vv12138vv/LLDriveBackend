@@ -5,7 +5,6 @@ import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.req.RegisterReq;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNullFields;
 
 import java.sql.Timestamp;
 
@@ -26,9 +25,9 @@ public class User {
     @TableField(value = "password")
     private String password;
     @TableField(value = "is_banned")
-    private boolean banned;
+    private Boolean isBanned;
     @TableField(value = "is_admin")
-    private boolean admin;
+    private Boolean isAdmin;
     @TableField(value = "create_time",fill= FieldFill.INSERT)
     private Timestamp createTime;
     @TableField(value = "update_time",fill = FieldFill.INSERT_UPDATE)
@@ -42,7 +41,7 @@ public class User {
         this.email=registerReq.getEmail();
         this.username= registerReq.getUsername();
         this.password= registerReq.getPassword();
-        this.banned=false;
-        this.admin=false;
+        this.isBanned =false;
+        this.isAdmin =false;
     }
 }

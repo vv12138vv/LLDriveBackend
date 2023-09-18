@@ -7,13 +7,13 @@ import lombok.Data;
 public class UserInfoResp {
     private String username;
     private String email;
-    private boolean banned;
-    private boolean admin;
+    private Boolean banned;
+    private Boolean admin;
 
     public UserInfoResp(User user){
         this.username=user.getUsername();
         this.email=user.getEmail();
-        this.banned=user.isBanned();
-        this.admin=user.isAdmin();
+        this.banned=user.getIsBanned();
+        this.admin=user.getIsAdmin();
     }
 }

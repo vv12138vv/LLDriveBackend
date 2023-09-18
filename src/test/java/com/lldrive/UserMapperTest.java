@@ -3,13 +3,9 @@ package com.lldrive;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.User;
 import com.lldrive.mapper.UserMapper;
-import com.lldrive.service.UserService;
-import com.lldrive.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.sql.Time;
 
 @SpringBootTest
 public class UserMapperTest {
@@ -24,8 +20,8 @@ public class UserMapperTest {
         user.setEmail("test@test.com");
         user.setUsername("test");
         user.setPassword("test");
-        user.setBanned(false);
-        user.setAdmin(false);
+        user.setIsBanned(false);
+        user.setIsAdmin(false);
         userMapper.insert(user);
     }
     @Test
