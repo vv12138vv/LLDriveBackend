@@ -59,9 +59,9 @@ public class UserFileServiceImpl implements UserFileService {
     }
 
     @Override
-    public CommonResp listUserFile(User user,String dirId){
+    public CommonResp<List<UserFile>> listUserFiles(User user,String dirId){
         List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirId(user.getRepoId(),dirId);
-        return new CommonResp(Status.SUCCESS,userFiles);
+        return new CommonResp<List<UserFile>>(Status.SUCCESS,userFiles);
     }
 
     @Override
@@ -108,10 +108,50 @@ public class UserFileServiceImpl implements UserFileService {
             }
         }
         for(UserFile dir:deleteDirs){
-            userFileMapper.updateUserFilesDeleted(dir.getUserFileId(),user.getRepoId(),true);
+            if(dir.getDirId()!=null){
+                userFileMapper.updateUserFilesDeleted(dir.getUserFileId(),user.getRepoId(),true);
+            }
         }
         userFileMapper.updateUserFileDeleted(userFileId,true);
         return new CommonResp(Status.SUCCESS);
     }
+
+    @Override
+    public CommonResp<List<UserFile>> searchUserFiles(User user, String fileName) {
+        List<UserFile> searchResult=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
+        if(searchResult.size()==0){
+            return new CommonResp (Status.FILE_NOT_EXIST);
+        }
+        return new CommonResp<List<UserFile>>(Status.SUCCESS,searchResult);
+    }
+
+    @Override
+    public CommonResp findUserFile(String userFileId) {
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(userFileId);
+        if(userFile==null){
+            return new CommonResp(Status.FILE_NOT_EXIST);
+        }
+        return new CommonResp(Status.SUCCESS,userFile);
+    }
+
+    @Override
+    public CommonResp renameUserFile(String userFileId, String newName) {
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(userFileId);
+        if(userFile==null){
+            return new CommonResp(Status.FILE_NOT_EXIST);
+        }
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByDirId(userFile.getDirId());
+        for(UserFile userfile:userFiles){
+            if(newName.equals(userfile.getFileName())){
+                return new CommonResp(Status.FILE_NAME_EXIST);
+            }
+        }
+        int res=userFileMapper.updateUserFileName(userFileId,newName);
+        if(res==1){
+            return new CommonResp(Status.SUCCESS);
+        }
+        return new CommonResp(Status.SYSTEM_ERROR);
+    }
+
 
 }

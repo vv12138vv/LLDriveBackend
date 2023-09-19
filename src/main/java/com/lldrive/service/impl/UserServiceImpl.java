@@ -1,11 +1,15 @@
 package com.lldrive.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.User;
 import com.lldrive.domain.req.LoginReq;
 import com.lldrive.domain.req.RegisterReq;
+import com.lldrive.domain.req.ResetPasswordReq;
+import com.lldrive.domain.req.SetNewPasswordReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.resp.UserInfoResp;
 import com.lldrive.domain.types.Status;
@@ -55,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CommonResp sendEmailCode(String email){
+    public CommonResp sendRegisterCode(String email){
         User user=userMapper.selectByEmail(email);
         if(user!=null){
             return new CommonResp(Status.EMAIL_EXIST);
@@ -67,6 +71,18 @@ public class UserServiceImpl implements UserService {
         //生成邮件
         String content=String.format(Email.USER_REGISTER_CONTENT,CODE_VALID_TIME,code);
         return emailService.sendEmail(email,Email.USER_REGISTER_SUBJECT,content);
+    }
+
+    @Override
+    public CommonResp sendResetCode(String email) {
+        User user=userMapper.selectByEmail(email);
+        if(user==null){
+            return new CommonResp(Status.EMAIL_NOT_EXIST);
+        }
+        String code=UUIDUtil.generate(6);
+        redisTemplate.opsForValue().set(email,code,CODE_VALID_TIME,TimeUnit.MINUTES);
+        String content=String.format(Email.RESET_PASSWORD_CONTENT,CODE_VALID_TIME,code);
+        return emailService.sendEmail(email,Email.RESET_PASSWORD_SUBJECT,content);
     }
 
     @Override
@@ -87,6 +103,29 @@ public class UserServiceImpl implements UserService {
         Map<String, Object> data = new HashMap<>();
         data.put("token", key);
         return new CommonResp(Status.SUCCESS, data);
+    }
+
+    @Override
+    public CommonResp resetPassword(ResetPasswordReq resetPasswordReq) {
+        User user=userMapper.selectByUsername(resetPasswordReq.getUsername());
+        if(user==null){
+            return new CommonResp(Status.USERNAME_NOT_EXIST);
+        }
+        String email=(String) redisTemplate.opsForValue().get(user.getEmail());
+        String reqEmail=resetPasswordReq.getCode().toString().toLowerCase(Locale.ROOT);
+        if(!email.equals(reqEmail)){//验证码检验
+            return new CommonResp(Status.INCORRECT_CODE);
+        }
+        return new CommonResp(Status.SUCCESS);
+    }
+
+    @Override
+    public CommonResp setNewPasword(SetNewPasswordReq setNewPasswordReq) {
+        int res=userMapper.updatePassword(setNewPasswordReq.getUsername(),setNewPasswordReq.getNewPassword());
+        if(res==1){
+            return new CommonResp(Status.SUCCESS);
+        }
+        return new CommonResp(Status.SYSTEM_ERROR);
     }
 
     @Override
@@ -122,5 +161,12 @@ public class UserServiceImpl implements UserService {
             return new CommonResp(Status.USERNAME_NOT_EXIST);
         }
         return new CommonResp(Status.SUCCESS,user);
+    }
+
+    @Override
+    public CommonResp getUsersInfo(Integer current,Integer size) {
+        Page<User> page=new Page<>(current,size);
+        IPage iPage=userMapper.selectPage(page,null);
+        return new CommonResp(Status.SUCCESS,iPage);
     }
 }
