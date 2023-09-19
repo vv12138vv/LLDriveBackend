@@ -33,4 +33,9 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Select("select * from user_files where dir_id=#{dirId} and is_dir=1")
     List<UserFile> selectDirsByDirId(@Param("dirId")String dirId);
 
+    @Select("select * from user_files where repo_id=#{repoId} and file_name like concat('%',#{fileName},'%')")
+    List<UserFile> selectUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName);
+
+    @Update("update user_files set file_name=#{newName} where user_file_id=#{userFileId}")
+    int updateUserFileName(@Param("userFileId")String userFileId,@Param("newName")String newName);
 }

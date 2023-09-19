@@ -2,6 +2,8 @@ package com.lldrive.controller;
 
 import com.lldrive.domain.entity.User;
 import com.lldrive.domain.req.LoginReq;
+import com.lldrive.domain.req.ResetPasswordReq;
+import com.lldrive.domain.req.SetNewPasswordReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.req.RegisterReq;
 import com.lldrive.domain.types.Status;
@@ -29,7 +31,7 @@ public class UserController {
     private RepoService repoService;
     @GetMapping("/register")
     public CommonResp sendRegisterCode(@Email String email){
-        return userService.sendEmailCode(email);
+        return userService.sendRegisterCode(email);
     }
     @PostMapping("/register")
     public CommonResp registerUser(@Validated @RequestBody RegisterReq registerReq){
@@ -60,4 +62,22 @@ public class UserController {
         return userService.logout(token);
     }
 
+    @GetMapping("/list")
+    public CommonResp listAllUser(@RequestParam("current")Integer current,@RequestParam("size")Integer size){
+        return userService.getUsersInfo(current,size);
+    }
+
+    @PostMapping("/reset-password")
+    public CommonResp resetPassword(@Validated @RequestBody ResetPasswordReq resetPasswordReq){
+        return userService.resetPassword(resetPasswordReq);
+    }
+    @GetMapping("/reset-password")//发送认证邮件
+    public CommonResp sendResetCode(@Validated @Email @RequestParam("email")String email){
+        return userService.sendResetCode(email);
+    }
+
+    @PostMapping("/set-new-password")
+    public CommonResp setNewPassword(@Validated @RequestBody SetNewPasswordReq setNewPasswordReq){
+        return userService.setNewPasword(setNewPasswordReq);
+    }
 }
