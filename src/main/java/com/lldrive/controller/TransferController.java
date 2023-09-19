@@ -2,6 +2,7 @@ package com.lldrive.controller;
 
 import com.lldrive.domain.entity.File;
 import com.lldrive.domain.entity.User;
+import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.UploadFileReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.types.Status;
@@ -17,11 +18,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
 
-@RestController()
+@RestController
 @RequestMapping("/api/transfers")
 public class TransferController {
     @Autowired
@@ -49,15 +52,33 @@ public class TransferController {
         return transferService.fastUpload(uploadFileReq);
     }
 
-//    @RequestMapping("/download")
-//    public CommonResp download(HttpServletResponse resp,String fileName){
-//         resp.setContentType("application/force-download");
-//         resp.setCharacterEncoding("utf-8");
-//         resp.setHeader("Content-Disposition","attachment;filename="+fileName);
-//
-//         byte[]readBytes= FileCopyUtils.copyToByteArray();
-//        OutputStream os=resp.getOutputStream();
-//        os.write();
-//    }
+    @GetMapping("/download")
+    public CommonResp download(@RequestParam("user_file_id")String userFileId,HttpServletResponse resp){
+        CommonResp userFileResp=userFileService.findUserFile(userFileId);
+        if(userFileResp.getData()==null){
+            return userFileResp;
+        }
+        UserFile userFile=(UserFile)userFileResp.getData();
+        CommonResp fileResp=transferService.findFile(userFile);
+        if(fileResp.getData()==null){
+            return fileResp;
+        }
+        File file=(File)fileResp.getData();
+        try{
+            FileInputStream in=new FileInputStream(file.getPath());
+            resp.setHeader("Content-Disposition","attachment;filename="+userFile.getFileName());
+            BufferedOutputStream out=new BufferedOutputStream(resp.getOutputStream());
+            byte []b=new byte[1024];
+            int len;
+            while((len=in.read(b))!=-1){
+                out.write(b,0,len);
+            }
+            in.close();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new CommonResp(Status.SUCCESS);
+    }
 
 }

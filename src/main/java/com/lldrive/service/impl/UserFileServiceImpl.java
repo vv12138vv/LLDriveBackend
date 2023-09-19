@@ -5,6 +5,7 @@ import com.lldrive.domain.entity.Repo;
 import com.lldrive.domain.entity.User;
 import com.lldrive.domain.entity.File;
 import com.lldrive.domain.entity.UserFile;
+import com.lldrive.domain.req.MoveFileReq;
 import com.lldrive.domain.req.UploadFileReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.types.Status;
@@ -153,5 +154,64 @@ public class UserFileServiceImpl implements UserFileService {
         return new CommonResp(Status.SYSTEM_ERROR);
     }
 
+    @Override
+    public CommonResp moveUserFile(MoveFileReq moveFileReq) {
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(moveFileReq.getUserFileId());
+        if(userFile==null){
+            return new CommonResp(Status.FILE_NAME_EXIST);
+        }
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByDirId(moveFileReq.getDirId());
+        for(UserFile file:userFiles){
+            if(file.getFileName().equals(userFile.getFileName())){
+                return new CommonResp(Status.FILE_NAME_EXIST);
+            }
+        }
+        int res=userFileMapper.updateUserFileDir(moveFileReq.getUserFileId(),moveFileReq.getDirId());
+        if(res==1){
+            return new CommonResp(Status.SUCCESS);
+        }
+        return new CommonResp(Status.SYSTEM_ERROR);
+    }
+    @Override
+    public CommonResp<List<UserFile>> listDeletedUserFiles(User user){
+        List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId());
+        return new CommonResp<List<UserFile>>(Status.SUCCESS,deletedFiles);
+    }
 
+
+    @Override
+    public CommonResp recoverUserFile(User user, String userFileId) {
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(userFileId);
+        if(!userFile.getIsDeleted()){
+            return new CommonResp(Status.FILE_NOT_DELETE);
+        }
+        if(!userFile.getIsDir()){
+            int res=userFileMapper.updateUserFileDeleted(userFileId,false);
+            if(res==1){
+                return new CommonResp(Status.SUCCESS);
+            }
+            return new CommonResp(Status.SYSTEM_ERROR);
+        }
+        List<UserFile> recoverDirs=new LinkedList<UserFile>();//记录文件夹
+        Queue<UserFile> queue=new LinkedList<UserFile>();//辅助队列
+        recoverDirs.add(userFile);
+        queue.add(userFile);
+        while(!queue.isEmpty()){
+            UserFile temp=queue.poll();
+            List<UserFile> dirs=userFileMapper.selectDirsByDirId(temp.getUserFileId());
+            for(UserFile dir:dirs){
+                queue.add(dir);
+                recoverDirs.add(dir);
+            }
+        }
+        for(UserFile dir:recoverDirs){
+            if(dir.getDirId()!=null){
+                userFileMapper.updateUserFilesDeleted(dir.getUserFileId(),user.getRepoId(),false);
+            }
+        }
+        userFileMapper.updateUserFileDeleted(userFileId,false);
+        return new CommonResp(Status.SUCCESS);
+
+
+    }
 }

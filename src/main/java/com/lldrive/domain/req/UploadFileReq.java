@@ -14,7 +14,7 @@ public class UploadFileReq {
     @NotBlank
     private String username;
     @NotNull
-    private boolean chunkFlag;//是否分片
+    private Boolean chunkFlag;//是否分片
     @NotBlank
     private String fileName;
     @NotNull
@@ -24,6 +24,6 @@ public class UploadFileReq {
     @NotBlank
     private String hash;//切片MD5值
     private MultipartFile file;//文件
-    private boolean dir;//是否是文件夹
+    private Boolean dir;//是否是文件夹
     private String dirId;//父文件夹的user_file_id
 }

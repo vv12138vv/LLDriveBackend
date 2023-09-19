@@ -9,4 +9,7 @@ public interface FileMapper extends BaseMapper<File> {
 
     @Select("select * from files where hash=#{hash}")
     File selectFileByHash(@Param("hash") String hash);
+
+    @Select("select * from files where file_id=#{fileId}")
+    File selectFileByFileId(@Param("fileId")String fileId);
 }

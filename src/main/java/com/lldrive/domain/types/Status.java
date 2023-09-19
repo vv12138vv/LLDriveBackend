@@ -18,6 +18,7 @@ public enum Status{
     FILE_NOT_EXIST(4010,"The file does not exist"),
     FILE_NAME_EXIST(4011,"The file name already exist"),
     EMAIL_NOT_EXIST(4012,"The email does not exist"),
+    FILE_NOT_DELETE(4013,"The file does not be deleted"),
     SUCCESS(5000,"SUCCESS");
 
     private Integer statusCode;
