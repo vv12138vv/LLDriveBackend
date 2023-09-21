@@ -8,7 +8,7 @@ public interface TransferService {
 
     CommonResp upload(UploadFileReq uploadFileReq);
 
-    CommonResp singleUpload(UploadFileReq uploadFileReq);
+    CommonResp simpleUpload(UploadFileReq uploadFileReq);
 
     CommonResp chunkUpload(UploadFileReq uploadFileReq);
 

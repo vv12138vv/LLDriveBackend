@@ -23,6 +23,7 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static com.lldrive.domain.consts.Const.CHUNK_SIZE;
 import static com.lldrive.domain.consts.Const.FILE_NAME_LENGTH;
@@ -46,13 +47,13 @@ public class TransferServiceImpl implements TransferService {
         }
         boolean chunkFlag = uploadFileReq.getChunkFlag();
         if (!chunkFlag) {
-            return singleUpload(uploadFileReq);
+            return simpleUpload(uploadFileReq);
         }
         return chunkUpload(uploadFileReq);
     }
 
     @Override
-    public CommonResp singleUpload(UploadFileReq uploadFileReq) {
+    public CommonResp simpleUpload(UploadFileReq uploadFileReq) {
         MultipartFile file = uploadFileReq.getFile();
         File baseFile = new File(FILE_STORE_PATH);
         if (!baseFile.exists()) {
@@ -108,7 +109,7 @@ public class TransferServiceImpl implements TransferService {
         try{
             File tmpFile=tmpFile(FILE_STORE_PATH,tmpFileName,uploadFileReq.getFile(),uploadFileReq.getChunkNumber(),uploadFileReq.getTotalSize(),uploadFileReq.getHash());
             Integer chunkCount= chunkMapper.chunkCount(uploadFileReq.getHash());
-            if(chunkCount==uploadFileReq.getTotalChunks()){
+            if(Objects.equals(chunkCount, uploadFileReq.getTotalChunks())){
                 lastFlag=true;
             }
             if(lastFlag){//若已为最后一片
@@ -120,6 +121,7 @@ public class TransferServiceImpl implements TransferService {
         }catch (Exception e){
             e.printStackTrace();
         }
+        return null;
     }
 
     private File tmpFile(String dir,String tmpFileName,MultipartFile file,Integer chunkNumber,Integer totalSize,String fileHash)throws IOException{

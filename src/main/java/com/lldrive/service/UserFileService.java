@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface UserFileService {
     CommonResp addFileToUser(File file, UploadFileReq uploadFileReq);
+    CommonResp addFileToUser(UserFile userFile,User user,String dirId);
     CommonResp<List<UserFile>> listUserFiles(User user, String dirId);
     CommonResp<List<UserFile>> searchUserFiles(User user,String fileName);
     CommonResp createDir(User user,String dirId,String dirName);

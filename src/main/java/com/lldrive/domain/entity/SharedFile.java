@@ -20,9 +20,9 @@ public class SharedFile {
     @TableField(value ="code")
     private String code;
     @TableField(value = "shared_count")
-    private long sharedCount;
+    private Long sharedCount;
     @TableField(value ="share_time")
-    private Timestamp share_time;
+    private Timestamp shareTime;
     @TableField(value ="expire_time")
-    private Timestamp expire_time;
+    private Timestamp expireTime;
 }

@@ -60,6 +60,23 @@ public class UserFileServiceImpl implements UserFileService {
     }
 
     @Override
+    public CommonResp addFileToUser(UserFile userFile,User user,String dirId){
+        UserFile newUserFile=new UserFile();
+        newUserFile.setFileName(userFile.getFileName());
+        newUserFile.setUserFileId(UUIDUtil.generate(UUID_LENGTH));
+        newUserFile.setType(userFile.getType());
+        newUserFile.setDirId(dirId);
+        newUserFile.setFileId(userFile.getFileId());
+        newUserFile.setRepoId(user.getRepoId());
+        newUserFile.setIsDir(userFile.getIsDir());
+        int res=userFileMapper.insert(newUserFile);
+        if(res==1){
+            return new CommonResp(Status.SUCCESS);
+        }
+        return new CommonResp(Status.SYSTEM_ERROR);
+    }
+
+    @Override
     public CommonResp<List<UserFile>> listUserFiles(User user,String dirId){
         List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirId(user.getRepoId(),dirId);
         return new CommonResp<List<UserFile>>(Status.SUCCESS,userFiles);
