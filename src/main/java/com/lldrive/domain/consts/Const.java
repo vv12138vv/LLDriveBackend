@@ -8,4 +8,5 @@ public class Const {
 
     public static final int FILE_NAME_LENGTH=32;
     public static final int LOGIN_VALID_TIME=15;
+    public static final long CHUNK_SIZE=5242880;//5MB
 }

@@ -14,10 +14,17 @@ import com.lldrive.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.Arrays;
 
+import static com.lldrive.domain.consts.Const.CHUNK_SIZE;
 import static com.lldrive.domain.consts.Const.FILE_NAME_LENGTH;
 
 @Service
@@ -42,11 +49,6 @@ public class TransferServiceImpl implements TransferService {
             return singleUpload(uploadFileReq);
         }
         return chunkUpload(uploadFileReq);
-    }
-
-    @Override
-    public CommonResp chunkUpload(UploadFileReq uploadFileReq) {
-        return null;
     }
 
     @Override
@@ -97,5 +99,72 @@ public class TransferServiceImpl implements TransferService {
             return new CommonResp(Status.FILE_NOT_EXIST);
         }
         return new CommonResp(Status.SUCCESS,file);
+    }
+
+    public CommonResp chunkUpload(UploadFileReq uploadFileReq){
+        Boolean lastFlag=false;
+        String tmpFileName=uploadFileReq.getFileName()+"_tmp";
+        //写入临时文件
+        try{
+            File tmpFile=tmpFile(FILE_STORE_PATH,tmpFileName,uploadFileReq.getFile(),uploadFileReq.getChunkNumber(),uploadFileReq.getTotalSize(),uploadFileReq.getHash());
+            Integer chunkCount= chunkMapper.chunkCount(uploadFileReq.getHash());
+            if(chunkCount==uploadFileReq.getTotalChunks()){
+                lastFlag=true;
+            }
+            if(lastFlag){//若已为最后一片
+                if(!checkHash(tmpFile,uploadFileReq.getHash())){//若hash不匹配
+                    cleanUp(tmpFile,uploadFileReq.getHash());
+                    return new CommonResp(Status.HASH_ERROR);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private File tmpFile(String dir,String tmpFileName,MultipartFile file,Integer chunkNumber,Integer totalSize,String fileHash)throws IOException{
+        Long position=((chunkNumber-1)*CHUNK_SIZE);
+        File tmpDir=new File(dir);
+        if(!tmpDir.exists()){
+            tmpDir.mkdirs();
+        }
+        File tmpFile=new File(tmpDir,tmpFileName);
+        RandomAccessFile raf=new RandomAccessFile(tmpFile,"rw");
+        if(raf.length()==0){
+            raf.setLength(totalSize);
+        }
+        FileChannel fc=raf.getChannel();
+        MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());
+        map.put(file.getBytes());
+        fc.close();
+        raf.close();
+        //记录已完成的分片
+        Chunk chunk=new Chunk();
+        chunk.setChunkNumber(chunkNumber);
+        chunk.setHash(fileHash);
+        chunk.setIsUpload(true);
+        chunk.setCurrentChunkSize(file.getSize());
+        int res=chunkMapper.insert(chunk);
+        if(res==1){
+            return tmpFile;
+        }
+        return null;
+    }
+
+    private Boolean checkHash(File file,String hash) throws IOException{
+        FileInputStream fis=new FileInputStream(file);
+        String fileHash= Arrays.toString(DigestUtils.md5Digest(fis));
+        fis.close();
+        if(fileHash.equals(hash)){
+            return true;
+        }
+        return false;
+    }
+
+    private void cleanUp(File file,String hash){
+        if(file.exists()){
+            file.delete();
+        }
+        int res=chunkMapper.deleteByHash(hash);
     }
 }

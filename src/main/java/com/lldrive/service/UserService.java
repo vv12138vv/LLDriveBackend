@@ -1,9 +1,6 @@
 package com.lldrive.service;
 
-import com.lldrive.domain.req.LoginReq;
-import com.lldrive.domain.req.RegisterReq;
-import com.lldrive.domain.req.ResetPasswordReq;
-import com.lldrive.domain.req.SetNewPasswordReq;
+import com.lldrive.domain.req.*;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +18,6 @@ public interface UserService {
     CommonResp resetPassword(ResetPasswordReq resetPasswordReq);
     CommonResp setNewPasword(SetNewPasswordReq setNewPasswordReq);
     CommonResp findUser(String username);
-
     CommonResp getUsersInfo(Integer curreent,Integer size);
+    CommonResp changePassword(ChangePasswordReq changePasswordReq);
 }

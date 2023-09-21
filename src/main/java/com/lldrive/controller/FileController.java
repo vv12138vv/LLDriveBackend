@@ -39,7 +39,7 @@ public class FileController {
             return resp;
         }
         for(UserFile userFile:userFiles){
-            if(type.equals("folder")){
+            if(type.equals("folder")){//如类型为文件夹
                 if(!userFile.getIsDir()){
                     userFiles.remove(userFile);
                 }

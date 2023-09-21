@@ -77,6 +77,7 @@ public class TransferController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            return new CommonResp(Status.SYSTEM_ERROR);
         }
         return new CommonResp(Status.SUCCESS);
     }

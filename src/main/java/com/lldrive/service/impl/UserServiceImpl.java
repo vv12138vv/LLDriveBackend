@@ -6,10 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.User;
-import com.lldrive.domain.req.LoginReq;
-import com.lldrive.domain.req.RegisterReq;
-import com.lldrive.domain.req.ResetPasswordReq;
-import com.lldrive.domain.req.SetNewPasswordReq;
+import com.lldrive.domain.req.*;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.resp.UserInfoResp;
 import com.lldrive.domain.types.Status;
@@ -168,5 +165,17 @@ public class UserServiceImpl implements UserService {
         Page<User> page=new Page<>(current,size);
         IPage iPage=userMapper.selectPage(page,null);
         return new CommonResp(Status.SUCCESS,iPage);
+    }
+
+    @Override
+    public CommonResp changePassword(ChangePasswordReq changePasswordReq) {
+        User user=userMapper.selectByUsername(changePasswordReq.getUsername());
+        if(user==null){
+            return new CommonResp(Status.USERNAME_NOT_EXIST);
+        }
+        if(!user.getPassword().equals(changePasswordReq.getPassword())){
+            return new CommonResp(Status.INCORRECT_PASSWORD);
+        }
+        return new CommonResp(Status.SUCCESS,user);
     }
 }
