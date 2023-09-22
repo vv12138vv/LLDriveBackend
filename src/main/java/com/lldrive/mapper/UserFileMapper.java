@@ -38,4 +38,12 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
 
     @Update("update user_files set file_name=#{newName} where user_file_id=#{userFileId}")
     int updateUserFileName(@Param("userFileId")String userFileId,@Param("newName")String newName);
+
+    @Update("update user_files set dir_id=#{dirId} where user_file_id=#{userFileId}")
+    int updateUserFileDir(@Param("userFileId")String userFileId,@Param("dirId")String dirId);
+
+
+    @Select("select * from user_files where repo_id=#{repoId} and is_deleted=1 and (dir_id='' or dir_id not in (select user_file_id from user_files where is_deleted=1 and repo_id=#{repoId})) ")
+    List<UserFile> selectDeletedFiles(@Param("repoId")String repoId);
+
 }

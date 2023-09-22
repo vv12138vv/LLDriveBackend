@@ -2,6 +2,7 @@ package com.lldrive.controller;
 
 import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.MkDirReq;
+import com.lldrive.domain.req.MoveFileReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.types.Status;
 import com.lldrive.service.UserFileService;
@@ -38,7 +39,7 @@ public class FileController {
             return resp;
         }
         for(UserFile userFile:userFiles){
-            if(type.equals("folder")){
+            if(type.equals("folder")){//如类型为文件夹
                 if(!userFile.getIsDir()){
                     userFiles.remove(userFile);
                 }
@@ -72,8 +73,7 @@ public class FileController {
             return userResp;
         }
         User user=(User)userResp.getData();
-        CommonResp resp=userFileService.deleteUserFile(user,userFileId);
-        return resp;
+        return userFileService.deleteUserFile(user,userFileId);
     }
 
     @GetMapping("/search")
@@ -91,4 +91,31 @@ public class FileController {
     CommonResp renameFile(@RequestParam("user_file_id")String userFileId,@RequestParam("new_name")String newName){
         return userFileService.renameUserFile(userFileId,newName);
     }
+
+    @PostMapping("/move")
+    CommonResp moveFile(@Validated @RequestBody MoveFileReq moveFileReq){
+        return userFileService.moveUserFile(moveFileReq);
+    }
+
+    @GetMapping("/list/recycle")
+    CommonResp listRecycle(@RequestParam("username")String username){
+        CommonResp userResp=userService.findUser(username);
+        if(userResp.getData()==null) {
+            return userResp;
+        }
+        User user=(User)userResp.getData();
+        return userFileService.listDeletedUserFiles(user);
+    }
+
+    @GetMapping("/recover")
+    CommonResp recoverFile(@RequestParam("user_file_id")String userFileId,@RequestParam("username")String username){
+        CommonResp userResp=userService.findUser(username);
+        if(userResp.getData()==null){
+            return userResp;
+        }
+        User user=(User)userResp.getData();
+        return userFileService.recoverUserFile(user,userFileId);
+    }
+
+
 }

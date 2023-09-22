@@ -6,15 +6,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.User;
-import com.lldrive.domain.req.LoginReq;
-import com.lldrive.domain.req.RegisterReq;
-import com.lldrive.domain.req.ResetPasswordReq;
-import com.lldrive.domain.req.SetNewPasswordReq;
+import com.lldrive.domain.req.*;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.resp.UserInfoResp;
 import com.lldrive.domain.types.Status;
 import com.lldrive.mapper.UserMapper;
 import com.lldrive.service.EmailService;
+import com.lldrive.service.TokenService;
 import com.lldrive.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,6 +35,9 @@ public class UserServiceImpl implements UserService {
     private RedisTemplate redisTemplate;
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private TokenService tokenService;
     @Override
     public CommonResp register(RegisterReq registerReq) {
         if(userMapper.selectByUsername(registerReq.getUsername())!=null){//用户名检验
@@ -45,9 +46,10 @@ public class UserServiceImpl implements UserService {
         if(userMapper.selectByEmail(registerReq.getEmail())!=null){//邮箱检验
             return new CommonResp(Status.EMAIL_EXIST);
         }
-        String email=(String) redisTemplate.opsForValue().get(registerReq.getEmail());
-        String reqEmail=registerReq.getCode().toString().toLowerCase(Locale.ROOT);
-        if(!email.equals(reqEmail)){//验证码检验
+//        String email=(String) redisTemplate.opsForValue().get(registerReq.getEmail());
+        String code=(String) tokenService.getToken(TokenService.Type.Regsiter,registerReq.getEmail());
+        String reqCode=registerReq.getCode().toString().toLowerCase(Locale.ROOT);
+        if(!code.equals(reqCode)){//验证码检验
             return new CommonResp(Status.INCORRECT_CODE);
         }
         User user=new User(registerReq);
@@ -67,7 +69,8 @@ public class UserServiceImpl implements UserService {
         //生成6位验证码
         String code=UUIDUtil.generate(6);
         //5 min有效期，存入redis
-        redisTemplate.opsForValue().set(email,code,CODE_VALID_TIME,TimeUnit.MINUTES);
+//        redisTemplate.opsForValue().set(email,code,CODE_VALID_TIME,TimeUnit.MINUTES);
+        tokenService.addToken(TokenService.Type.Regsiter,email,code);
         //生成邮件
         String content=String.format(Email.USER_REGISTER_CONTENT,CODE_VALID_TIME,code);
         return emailService.sendEmail(email,Email.USER_REGISTER_SUBJECT,content);
@@ -80,7 +83,7 @@ public class UserServiceImpl implements UserService {
             return new CommonResp(Status.EMAIL_NOT_EXIST);
         }
         String code=UUIDUtil.generate(6);
-        redisTemplate.opsForValue().set(email,code,CODE_VALID_TIME,TimeUnit.MINUTES);
+        tokenService.addToken(TokenService.Type.Reset,email,code);
         String content=String.format(Email.RESET_PASSWORD_CONTENT,CODE_VALID_TIME,code);
         return emailService.sendEmail(email,Email.RESET_PASSWORD_SUBJECT,content);
     }
@@ -111,9 +114,10 @@ public class UserServiceImpl implements UserService {
         if(user==null){
             return new CommonResp(Status.USERNAME_NOT_EXIST);
         }
-        String email=(String) redisTemplate.opsForValue().get(user.getEmail());
-        String reqEmail=resetPasswordReq.getCode().toString().toLowerCase(Locale.ROOT);
-        if(!email.equals(reqEmail)){//验证码检验
+//        String email=(String) redisTemplate.opsForValue().get(user.getEmail());
+        String code=(String) tokenService.getToken(TokenService.Type.Reset,user.getEmail());
+        String reqCode=resetPasswordReq.getCode().toString().toLowerCase(Locale.ROOT);
+        if(!code.equals(reqCode)){//验证码检验
             return new CommonResp(Status.INCORRECT_CODE);
         }
         return new CommonResp(Status.SUCCESS);
@@ -168,5 +172,17 @@ public class UserServiceImpl implements UserService {
         Page<User> page=new Page<>(current,size);
         IPage iPage=userMapper.selectPage(page,null);
         return new CommonResp(Status.SUCCESS,iPage);
+    }
+
+    @Override
+    public CommonResp changePassword(ChangePasswordReq changePasswordReq) {
+        User user=userMapper.selectByUsername(changePasswordReq.getUsername());
+        if(user==null){
+            return new CommonResp(Status.USERNAME_NOT_EXIST);
+        }
+        if(!user.getPassword().equals(changePasswordReq.getPassword())){
+            return new CommonResp(Status.INCORRECT_PASSWORD);
+        }
+        return new CommonResp(Status.SUCCESS,user);
     }
 }

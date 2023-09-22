@@ -4,6 +4,7 @@ import com.lldrive.domain.entity.User;
 import com.lldrive.domain.req.LoginReq;
 import com.lldrive.domain.req.ResetPasswordReq;
 import com.lldrive.domain.req.SetNewPasswordReq;
+import com.lldrive.domain.req.ChangePasswordReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.req.RegisterReq;
 import com.lldrive.domain.types.Status;
@@ -79,5 +80,14 @@ public class UserController {
     @PostMapping("/set-new-password")
     public CommonResp setNewPassword(@Validated @RequestBody SetNewPasswordReq setNewPasswordReq){
         return userService.setNewPasword(setNewPasswordReq);
+    }
+
+    @PostMapping("/change-password")
+    public CommonResp changePassword(@Validated @RequestBody ChangePasswordReq changePasswordReq){
+        CommonResp userResp=userService.changePassword(changePasswordReq);
+        if(userResp.getData()==null){
+            return userResp;
+        }
+        return new CommonResp(Status.SUCCESS);
     }
 }

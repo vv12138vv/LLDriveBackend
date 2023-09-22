@@ -12,18 +12,12 @@ import java.sql.Timestamp;
 public class Chunk {
     @TableId
     private Integer id;
-    @TableField("chunk_id")
-    private String chunkId;
+    @TableField("hash")
+    private String hash;
     @TableField("chunk_number")//当前分片序号
     private Integer chunkNumber;
-    @TableField("chunk_size")
-    private Long chunkSize;//分片大小
     @TableField("cur_chunk_size")
     private Long currentChunkSize;//当前分片大小
-    @TableField("total_size")
-    private Long totalSize;//总大小
-    @TableField("total_chunks")
-    private Integer totalChunks;//总分片数
     @TableField("upload_time")
-    private Timestamp uploadTime;//上传时间
+    private Boolean isUpload;
 }
