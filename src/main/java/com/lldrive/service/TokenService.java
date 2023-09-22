@@ -13,4 +13,6 @@ public interface TokenService {
 
     Object getToken(Type type,String key);
 
+    boolean updateToekn(Type type,String key);
+
 }

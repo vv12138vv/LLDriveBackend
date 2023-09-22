@@ -25,8 +25,7 @@ import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static com.lldrive.domain.consts.Const.CHUNK_SIZE;
-import static com.lldrive.domain.consts.Const.FILE_NAME_LENGTH;
+import static com.lldrive.domain.consts.Const.*;
 
 @Service
 public class TransferServiceImpl implements TransferService {
@@ -65,7 +64,7 @@ public class TransferServiceImpl implements TransferService {
                 return new CommonResp(Status.INVALID_EXTENSION);
             }
             String newName = UUIDUtil.generate(FILE_NAME_LENGTH);
-            file.transferTo(new File(baseFile, newName + "." + extension));//存入储存池
+            file.transferTo(new File(baseFile, newName + "." + extension));//存入储
             com.lldrive.domain.entity.File fileRecord = new com.lldrive.domain.entity.File();//数据库添加信息
             String filePath = FILE_STORE_PATH + File.separator + newName + "." + extension;
             fileRecord.setPath(filePath);
@@ -117,6 +116,11 @@ public class TransferServiceImpl implements TransferService {
                     cleanUp(tmpFile,uploadFileReq.getHash());
                     return new CommonResp(Status.HASH_ERROR);
                 }
+                if(!renameFile(tmpFile,uploadFileReq.getFileName())) {
+                    return new CommonResp(Status.SYSTEM_ERROR);
+                }
+                addNewFile(tmpFile,uploadFileReq.getHash(),uploadFileReq.getTotalSize());
+                return new CommonResp(Status.SUCCESS);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -131,13 +135,14 @@ public class TransferServiceImpl implements TransferService {
             tmpDir.mkdirs();
         }
         File tmpFile=new File(tmpDir,tmpFileName);
-        RandomAccessFile raf=new RandomAccessFile(tmpFile,"rw");
+        RandomAccessFile raf=new RandomAccessFile(tmpFile,"rw");//读写权限
         if(raf.length()==0){
             raf.setLength(totalSize);
         }
+        //写入分片数据
         FileChannel fc=raf.getChannel();
-        MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());
-        map.put(file.getBytes());
+        MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());//将文件的一部分映射到内存中方便读写
+        map.put(file.getBytes());//写入
         fc.close();
         raf.close();
         //记录已完成的分片
@@ -153,7 +158,7 @@ public class TransferServiceImpl implements TransferService {
         return null;
     }
 
-    private Boolean checkHash(File file,String hash) throws IOException{
+    private Boolean checkHash(File file,String hash) throws IOException{//检查MD5值
         FileInputStream fis=new FileInputStream(file);
         String fileHash= Arrays.toString(DigestUtils.md5Digest(fis));
         fis.close();
@@ -163,10 +168,39 @@ public class TransferServiceImpl implements TransferService {
         return false;
     }
 
-    private void cleanUp(File file,String hash){
+    private void cleanUp(File file,String hash){//删除已有分片记录
         if(file.exists()){
             file.delete();
         }
         int res=chunkMapper.deleteByHash(hash);
+    }
+
+    private boolean renameFile(File toBeRenamed, String newName) {
+        // 检查要重命名的文件是否存在，是否是文件
+        if (!toBeRenamed.exists() || toBeRenamed.isDirectory()) {
+            return false;
+        }
+        String parentPath = toBeRenamed.getParent();
+        File newFile = new File(parentPath + File.separatorChar + newName);
+        // 如果存在, 先删除
+        if (newFile.exists()) {
+            newFile.delete();
+        }
+        return toBeRenamed.renameTo(newFile);
+    }
+
+
+    public boolean addNewFile(File file,String hash,Integer totalSize){//数据库中添加文件记录
+        com.lldrive.domain.entity.File fileRecord=new com.lldrive.domain.entity.File();
+        fileRecord.setFileId(UUIDUtil.generate(UUID_LENGTH));
+        fileRecord.setPath(file.getPath());
+        fileRecord.setType(FileUtil.getFileExtension(file.getName()));
+        fileRecord.setHash(hash);
+        fileRecord.setSize(Long.valueOf(totalSize));
+        int res=fileMapper.insert(fileRecord);
+        if(res==1){
+            return true;
+        }
+        return false;
     }
 }

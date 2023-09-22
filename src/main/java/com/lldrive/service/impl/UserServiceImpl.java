@@ -46,9 +46,10 @@ public class UserServiceImpl implements UserService {
         if(userMapper.selectByEmail(registerReq.getEmail())!=null){//邮箱检验
             return new CommonResp(Status.EMAIL_EXIST);
         }
-        String email=(String) redisTemplate.opsForValue().get(registerReq.getEmail());
-        String reqEmail=registerReq.getCode().toString().toLowerCase(Locale.ROOT);
-        if(!email.equals(reqEmail)){//验证码检验
+//        String email=(String) redisTemplate.opsForValue().get(registerReq.getEmail());
+        String code=(String) tokenService.getToken(TokenService.Type.Regsiter,registerReq.getEmail());
+        String reqCode=registerReq.getCode().toString().toLowerCase(Locale.ROOT);
+        if(!code.equals(reqCode)){//验证码检验
             return new CommonResp(Status.INCORRECT_CODE);
         }
         User user=new User(registerReq);
