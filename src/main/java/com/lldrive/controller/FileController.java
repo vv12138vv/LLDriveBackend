@@ -35,7 +35,7 @@ public class FileController {
         User user=(User) userResp.getData();
         CommonResp<List<UserFile>> resp=userFileService.listUserFiles(user,dirId);
         List<UserFile> userFiles=resp.getData();
-        if (type==null){//若无类型要求，则返回所有类型文件
+        if (type==null||type.equals("")){//若无类型要求，则返回所有类型文件
             return resp;
         }
         for(UserFile userFile:userFiles){

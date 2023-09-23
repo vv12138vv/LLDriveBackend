@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
 import com.lldrive.domain.consts.Email;
 
 import static com.lldrive.domain.consts.Const.*;
@@ -46,8 +46,7 @@ public class UserServiceImpl implements UserService {
         if(userMapper.selectByEmail(registerReq.getEmail())!=null){//邮箱检验
             return new CommonResp(Status.EMAIL_EXIST);
         }
-//        String email=(String) redisTemplate.opsForValue().get(registerReq.getEmail());
-        String code=(String) tokenService.getToken(TokenService.Type.Regsiter,registerReq.getEmail());
+        String code=(String) tokenService.getValue(TokenService.Type.Regsiter,registerReq.getEmail());
         String reqCode=registerReq.getCode().toString().toLowerCase(Locale.ROOT);
         if(!code.equals(reqCode)){//验证码检验
             return new CommonResp(Status.INCORRECT_CODE);
@@ -99,9 +98,10 @@ public class UserServiceImpl implements UserService {
         }
 
         //存入redis
-        String key = "user:" + UUIDUtil.generate(UUID_LENGTH);
+        String key = UUIDUtil.generate(UUID_LENGTH);
         user.setPassword(null);
-        redisTemplate.opsForValue().set(key, user, LOGIN_VALID_TIME, TimeUnit.MINUTES);
+//        redisTemplate.opsForValue().set(key, user, LOGIN_VALID_TIME, TimeUnit.MINUTES);
+        tokenService.addToken(TokenService.Type.Login,key,user);
         //返回token
         Map<String, Object> data = new HashMap<>();
         data.put("token", key);
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
             return new CommonResp(Status.USERNAME_NOT_EXIST);
         }
 //        String email=(String) redisTemplate.opsForValue().get(user.getEmail());
-        String code=(String) tokenService.getToken(TokenService.Type.Reset,user.getEmail());
+        String code=(String) tokenService.getValue(TokenService.Type.Reset,user.getEmail());
         String reqCode=resetPasswordReq.getCode().toString().toLowerCase(Locale.ROOT);
         if(!code.equals(reqCode)){//验证码检验
             return new CommonResp(Status.INCORRECT_CODE);
@@ -134,18 +134,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CommonResp getUserInfo(String token) {
-        Object obj = redisTemplate.opsForValue().get(token);
-        if (obj == null) {
-            return new CommonResp(Status.LOGIN_EXPIRED);
-        }
-        //json转object
-        ObjectMapper mapper = new ObjectMapper();
-        User user = null;
-        try {
-            String jsonString = mapper.writeValueAsString(obj);
-            user = mapper.readValue(jsonString, User.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        User user=tokenService.getUser(TokenService.Type.Login,token);
+        if(user==null){
+            return new CommonResp(Status.USERNAME_NOT_EXIST);
         }
         //封装信息
         UserInfoResp resp=new UserInfoResp(user);

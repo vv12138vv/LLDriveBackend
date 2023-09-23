@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public CommonResp userInfo(@RequestParam("token")String token){
+    public CommonResp userInfo(@RequestHeader("X-Token")String token){
         return userService.getUserInfo(token);
     }
 

@@ -1,6 +1,6 @@
 package com.lldrive.service;
 
-import com.lldrive.service.impl.TokenServiceImpl;
+import com.lldrive.domain.entity.User;
 
 public interface TokenService {
 
@@ -9,10 +9,11 @@ public interface TokenService {
         Login,
         Reset
     }
-    void addToken(Type type, String key, Object value);
+    String addToken(Type type, String key, Object value);
 
-    Object getToken(Type type,String key);
+    Object getValue(Type type, String key);
 
-    boolean updateToekn(Type type,String key);
+    boolean updateToken(Type type,String key);
 
+    User getUser(Type type, String key);
 }
