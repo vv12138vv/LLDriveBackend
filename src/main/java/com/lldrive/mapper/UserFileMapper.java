@@ -46,4 +46,6 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Select("select * from user_files where repo_id=#{repoId} and is_deleted=1 and (dir_id='' or dir_id not in (select user_file_id from user_files where is_deleted=1 and repo_id=#{repoId})) ")
     List<UserFile> selectDeletedFiles(@Param("repoId")String repoId);
 
+    @Update("update user_files set size=size+#{fileSize} where user_file_id=#{userFileId}")
+    int updateUserFileSize(@Param("userFileId")String userFileId,@Param("fileSize")Long fileSize);
 }

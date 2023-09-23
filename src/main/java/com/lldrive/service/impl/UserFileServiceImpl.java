@@ -47,13 +47,16 @@ public class UserFileServiceImpl implements UserFileService {
         UserFile uploadFile=new UserFile();
         uploadFile.setFileId(file.getFileId());
         uploadFile.setFileName(uploadFileReq.getFileName());
-//        uploadFile.setDir(uploadFileReq.isDir());
+        uploadFile.setIsDir(uploadFileReq.getDir());
         uploadFile.setDirId(uploadFileReq.getDirId());
         uploadFile.setUserFileId(UUIDUtil.generate(UUID_LENGTH));
         uploadFile.setType(file.getType());
         uploadFile.setRepoId(uploadUser.getRepoId());
+        uploadFile.setSize(file.getSize());
         int res=userFileMapper.insert(uploadFile);
         if(res==1){
+            this.updateDirSize(uploadFile.getUserFileId(),true);
+            repoMapper.updateCurCapacity(uploadUser.getRepoId(), uploadFile.getSize());
             return new CommonResp(Status.SUCCESS,uploadFile);
         }
         return new CommonResp(Status.SYSTEM_ERROR);
@@ -71,6 +74,8 @@ public class UserFileServiceImpl implements UserFileService {
         newUserFile.setIsDir(userFile.getIsDir());
         int res=userFileMapper.insert(newUserFile);
         if(res==1){
+            this.updateDirSize(userFile.getUserFileId(),true);//更新父文件大小
+            repoMapper.updateCurCapacity(user.getRepoId(), userFile.getSize());//更新仓库大小
             return new CommonResp(Status.SUCCESS);
         }
         return new CommonResp(Status.SYSTEM_ERROR);
@@ -109,6 +114,7 @@ public class UserFileServiceImpl implements UserFileService {
         if(!userFile.getIsDir()){//若不是文件夹
             int res=userFileMapper.updateUserFileDeleted(userFileId,true);
             if(res==1){
+                repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
                 return new CommonResp(Status.SUCCESS);
             }
             return new CommonResp(Status.SYSTEM_ERROR);
@@ -127,10 +133,12 @@ public class UserFileServiceImpl implements UserFileService {
         }
         for(UserFile dir:deleteDirs){
             if(dir.getDirId()!=null){
-                userFileMapper.updateUserFilesDeleted(dir.getUserFileId(),user.getRepoId(),true);
+                userFileMapper.updateUserFilesDeleted(dir.getUserFileId(),user.getRepoId(),true);//使该目录下的所有文件逻辑删除
             }
         }
         userFileMapper.updateUserFileDeleted(userFileId,true);
+        this.updateDirSize(userFileId,false);
+        repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
         return new CommonResp(Status.SUCCESS);
     }
 
@@ -177,14 +185,16 @@ public class UserFileServiceImpl implements UserFileService {
         if(userFile==null){
             return new CommonResp(Status.FILE_NAME_EXIST);
         }
-        List<UserFile> userFiles=userFileMapper.selectUserFilesByDirId(moveFileReq.getDirId());
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByDirId(moveFileReq.getDirId());//重名检查
         for(UserFile file:userFiles){
             if(file.getFileName().equals(userFile.getFileName())){
                 return new CommonResp(Status.FILE_NAME_EXIST);
             }
         }
-        int res=userFileMapper.updateUserFileDir(moveFileReq.getUserFileId(),moveFileReq.getDirId());
+        this.updateDirSize(userFile.getUserFileId(),false);//减少当前父文件夹大小
+        int res=userFileMapper.updateUserFileDir(moveFileReq.getUserFileId(),moveFileReq.getDirId());//更新父亲文件夹
         if(res==1){
+            this.updateDirSize(moveFileReq.getUserFileId(),true);//增加当前父文件夹大小
             return new CommonResp(Status.SUCCESS);
         }
         return new CommonResp(Status.SYSTEM_ERROR);
@@ -205,6 +215,8 @@ public class UserFileServiceImpl implements UserFileService {
         if(!userFile.getIsDir()){
             int res=userFileMapper.updateUserFileDeleted(userFileId,false);
             if(res==1){
+                this.updateDirSize(userFileId,true);
+                repoMapper.updateCurCapacity(user.getRepoId(), userFile.getSize());
                 return new CommonResp(Status.SUCCESS);
             }
             return new CommonResp(Status.SYSTEM_ERROR);
@@ -227,8 +239,34 @@ public class UserFileServiceImpl implements UserFileService {
             }
         }
         userFileMapper.updateUserFileDeleted(userFileId,false);
+        this.updateDirSize(userFileId,true);
+        repoMapper.updateCurCapacity(user.getRepoId(),userFile.getSize());
         return new CommonResp(Status.SUCCESS);
+    }
 
-
+    //flag==true为+，false为-
+    public void updateDirSize(String userFileId,boolean flag){//迭代更新父文件夹大小
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(userFileId);
+        if(userFile==null){
+            return;
+        }
+        Queue<UserFile>queue=new LinkedList<UserFile>();
+        UserFile dir=userFileMapper.selectUserFileByUserFileId(userFile.getDirId());
+        if(dir==null){
+            return;
+        }
+        queue.add(dir);
+        while(!queue.isEmpty()){
+            UserFile temp=queue.poll();
+            if(flag){
+                userFileMapper.updateUserFileSize(temp.getUserFileId(), userFile.getSize());
+            }else{
+                userFileMapper.updateUserFileSize(temp.getUserFileId(), -userFile.getSize());
+            }
+            UserFile father=userFileMapper.selectUserFileByUserFileId(temp.getDirId());
+            if(father!=null){
+                queue.add(father);
+            }
+        }
     }
 }

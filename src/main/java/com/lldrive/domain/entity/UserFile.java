@@ -26,6 +26,8 @@ public class UserFile {
     private String repoId;
     @TableField(value = "is_deleted")
     private Boolean isDeleted;
+    @TableField(value = "size")
+    private Long size;
     @TableField(value = "create_time",fill= FieldFill.INSERT)
     private Timestamp createTime;
     @TableField(value = "update_time",fill=FieldFill.INSERT_UPDATE)
