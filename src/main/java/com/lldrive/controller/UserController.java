@@ -31,7 +31,7 @@ public class UserController {
     @Autowired
     private RepoService repoService;
     @GetMapping("/register")
-    public CommonResp sendRegisterCode(@Email String email){
+    public CommonResp sendRegisterCode(@NotNull @Email String email){
         return userService.sendRegisterCode(email);
     }
     @PostMapping("/register")

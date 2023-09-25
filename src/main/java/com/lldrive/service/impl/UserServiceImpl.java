@@ -89,9 +89,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CommonResp login(LoginReq loginReq) {
-        User user = userMapper.selectByUsername(loginReq.getUsername());
+        User user = userMapper.selectByEmail(loginReq.getEmail());
         if (user == null) {//用户名不存在
-            return new CommonResp(Status.USERNAME_NOT_EXIST);
+            return new CommonResp(Status.EMAIL_NOT_EXIST);
         }
         if (!user.getPassword().equals(loginReq.getPassword())) {
             return new CommonResp(Status.INCORRECT_PASSWORD);
