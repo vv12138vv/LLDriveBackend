@@ -11,6 +11,7 @@ import com.lldrive.mapper.ChunkMapper;
 import com.lldrive.mapper.FileMapper;
 import com.lldrive.mapper.UserFileMapper;
 import com.lldrive.service.TransferService;
+import com.lldrive.service.UserFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,8 @@ public class TransferServiceImpl implements TransferService {
     FileMapper fileMapper;
     @Autowired
     UserFileMapper userFileMapper;
+    @Autowired
+    UserFileService userFileService;
     @Value("C:\\Users\\jjjjssky\\Desktop\\LLDrive\\LLDrive\\src\\main\\resources\\file_storage")
     private String FILE_STORE_PATH;
 
@@ -86,6 +89,7 @@ public class TransferServiceImpl implements TransferService {
     public CommonResp fastUpload(UploadFileReq uploadFileReq) {
         com.lldrive.domain.entity.File file = fileMapper.selectFileByHash(uploadFileReq.getHash());
         if (file != null) {
+            userFileService.addFileToUser(file,uploadFileReq);
             return new CommonResp(Status.SUCCESS, true);//快速上传成功
         } else {
             return new CommonResp(Status.SUCCESS, false);//不能快速上传

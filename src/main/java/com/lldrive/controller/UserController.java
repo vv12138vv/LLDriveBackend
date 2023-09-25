@@ -31,7 +31,7 @@ public class UserController {
     @Autowired
     private RepoService repoService;
     @GetMapping("/register")
-    public CommonResp sendRegisterCode(@Email String email){
+    public CommonResp sendRegisterCode(@NotNull @Email String email){
         return userService.sendRegisterCode(email);
     }
     @PostMapping("/register")
@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public CommonResp userInfo(@RequestParam("token")String token){
+    public CommonResp userInfo(@RequestHeader("X-Token")String token){
         return userService.getUserInfo(token);
     }
 
