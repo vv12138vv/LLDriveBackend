@@ -2,8 +2,6 @@ package com.lldrive.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.User;
 import com.lldrive.domain.req.*;
@@ -110,9 +108,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CommonResp resetPassword(ResetPasswordReq resetPasswordReq) {
-        User user=userMapper.selectByUsername(resetPasswordReq.getUsername());
+        User user=userMapper.selectByUsername(resetPasswordReq.getEmail());
         if(user==null){
-            return new CommonResp(Status.USERNAME_NOT_EXIST);
+            return new CommonResp(Status.EMAIL_NOT_EXIST);
         }
 //        String email=(String) redisTemplate.opsForValue().get(user.getEmail());
         String code=(String) tokenService.getValue(TokenService.Type.Reset,user.getEmail());
@@ -125,7 +123,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CommonResp setNewPasword(SetNewPasswordReq setNewPasswordReq) {
-        int res=userMapper.updatePassword(setNewPasswordReq.getUsername(),setNewPasswordReq.getNewPassword());
+        int res=userMapper.updatePassword(setNewPasswordReq.getEmail(),setNewPasswordReq.getNewPassword());
         if(res==1){
             return new CommonResp(Status.SUCCESS);
         }
@@ -167,9 +165,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CommonResp changePassword(ChangePasswordReq changePasswordReq) {
-        User user=userMapper.selectByUsername(changePasswordReq.getUsername());
+        User user=userMapper.selectByEmail(changePasswordReq.getEmail());
         if(user==null){
-            return new CommonResp(Status.USERNAME_NOT_EXIST);
+            return new CommonResp(Status.EMAIL_NOT_EXIST);
         }
         if(!user.getPassword().equals(changePasswordReq.getPassword())){
             return new CommonResp(Status.INCORRECT_PASSWORD);

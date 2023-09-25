@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class LoginReq {
-    @NotBlank(message = "username must be not blank")
+    @NotBlank(message = "email must be not blank")
     private String email;
     @NotBlank(message = "password must be not blank")
     private String password;
