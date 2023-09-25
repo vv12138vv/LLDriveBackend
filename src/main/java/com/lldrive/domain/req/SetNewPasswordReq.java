@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
  public class SetNewPasswordReq {
     @NotBlank
-    private String username;
+    private String email;
     @NotBlank
     @JsonProperty("new_password")
     private String newPassword;
