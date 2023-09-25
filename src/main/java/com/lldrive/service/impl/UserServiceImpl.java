@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CommonResp resetPassword(ResetPasswordReq resetPasswordReq) {
-        User user=userMapper.selectByUsername(resetPasswordReq.getEmail());
+        User user=userMapper.selectByEmail(resetPasswordReq.getEmail());
         if(user==null){
             return new CommonResp(Status.EMAIL_NOT_EXIST);
         }
