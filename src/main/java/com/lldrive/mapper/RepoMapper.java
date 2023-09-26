@@ -9,7 +9,8 @@ import org.apache.ibatis.annotations.Update;
 public interface RepoMapper extends BaseMapper<Repo> {
     @Select("select * from repos and users where users.username=#{username}")
     Repo selectRepoByUsername(String username);
-
+    @Select("select * from repos where repo_id=#{repoId}")
+    Repo selectRepoByRepoId(@Param("repoId")String repoId);
     @Update("update repos set cur_capacity=cur_capacity+#{fileSize} where repo_id=#{repoId}")
     int updateCurCapacity(@Param("repoId")String repoId,@Param("fileSize")Long fileSize);
 }

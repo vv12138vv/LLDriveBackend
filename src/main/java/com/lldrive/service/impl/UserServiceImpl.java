@@ -3,11 +3,13 @@ package com.lldrive.service.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lldrive.Utils.UUIDUtil;
+import com.lldrive.domain.entity.Repo;
 import com.lldrive.domain.entity.User;
 import com.lldrive.domain.req.*;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.resp.UserInfoResp;
 import com.lldrive.domain.types.Status;
+import com.lldrive.mapper.RepoMapper;
 import com.lldrive.mapper.UserMapper;
 import com.lldrive.service.EmailService;
 import com.lldrive.service.TokenService;
@@ -33,7 +35,8 @@ public class UserServiceImpl implements UserService {
     private RedisTemplate redisTemplate;
     @Autowired
     private EmailService emailService;
-
+    @Autowired
+    private RepoMapper repoMapper;
     @Autowired
     private TokenService tokenService;
     @Override
@@ -136,8 +139,12 @@ public class UserServiceImpl implements UserService {
         if(user==null){
             return new CommonResp(Status.USERNAME_NOT_EXIST);
         }
+        Repo repo=repoMapper.selectRepoByRepoId(user.getRepoId());
+        if(repo==null){
+            return new CommonResp(Status.USERNAME_NOT_EXIST);
+        }
         //封装信息
-        UserInfoResp resp=new UserInfoResp(user);
+        UserInfoResp resp=new UserInfoResp(user,repo);
         return new CommonResp(Status.SUCCESS,resp);
     }
 
