@@ -21,9 +21,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.lang.ref.Cleaner;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.lldrive.domain.consts.Const.*;
@@ -107,38 +114,40 @@ public class TransferServiceImpl implements TransferService {
 
     public CommonResp chunkUpload(UploadFileReq uploadFileReq){
         Boolean lastFlag=false;
-        String tmpFileName=uploadFileReq.getFileName()+"_tmp";
+        String fileName=uploadFileReq.getFileName();
+//        String parentDir=FILE_STORE_PATH+File.separator+uploadFileReq.getHash()+File.separator;
+        String tempFilename=fileName+"_tmp";
         //写入临时文件
         try{
-            File tmpFile=tmpFile(FILE_STORE_PATH,tmpFileName,uploadFileReq.getFile(),uploadFileReq.getChunkNumber(),uploadFileReq.getTotalSize(),uploadFileReq.getHash());
+            File tmpFile=tmpFile(FILE_STORE_PATH,tempFilename,uploadFileReq.getFile(),uploadFileReq.getChunkNumber(),uploadFileReq.getTotalSize(),uploadFileReq.getHash());
             Integer chunkCount= chunkMapper.chunkCount(uploadFileReq.getHash());
             if(Objects.equals(chunkCount, uploadFileReq.getTotalChunks())){
                 lastFlag=true;
             }
             if(lastFlag){//若已为最后一片
-                if(!checkHash(tmpFile,uploadFileReq.getHash())){//若hash不匹配
-                    cleanUp(tmpFile,uploadFileReq.getHash());
-                    return new CommonResp(Status.HASH_ERROR);
-                }
-                if(!renameFile(tmpFile,uploadFileReq.getFileName())) {
-                    return new CommonResp(Status.SYSTEM_ERROR);
-                }
+//                if(!checkHash(tmpFile,uploadFileReq.getHash())){//若hash不匹配
+//                    cleanUp(tmpFile,uploadFileReq.getHash());
+//                    return new CommonResp(Status.HASH_ERROR);
+//                }
+//                if(!renameFile(tmpFile,uploadFileReq.getFileName())) {
+//                    return new CommonResp(Status.SYSTEM_ERROR);
+//                }
                 addNewFile(tmpFile,uploadFileReq.getHash(),uploadFileReq.getTotalSize());
                 return new CommonResp(Status.SUCCESS);
             }
         }catch (Exception e){
             e.printStackTrace();
         }
-        return null;
+        return new CommonResp(Status.CHUNK_SUCCESS);
     }
 
     private File tmpFile(String dir,String tmpFileName,MultipartFile file,Integer chunkNumber,Integer totalSize,String fileHash)throws IOException{
-        Long position=((chunkNumber-1)*CHUNK_SIZE);
+        Long position=((chunkNumber)*CHUNK_SIZE);
         File tmpDir=new File(dir);
+        File tmpFile=new File(dir,tmpFileName);
         if(!tmpDir.exists()){
             tmpDir.mkdirs();
         }
-        File tmpFile=new File(tmpDir,tmpFileName);
         RandomAccessFile raf=new RandomAccessFile(tmpFile,"rw");//读写权限
         if(raf.length()==0){
             raf.setLength(totalSize);
@@ -147,6 +156,7 @@ public class TransferServiceImpl implements TransferService {
         FileChannel fc=raf.getChannel();
         MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());//将文件的一部分映射到内存中方便读写
         map.put(file.getBytes());//写入
+        map.reset();
         fc.close();
         raf.close();
         //记录已完成的分片
@@ -190,7 +200,8 @@ public class TransferServiceImpl implements TransferService {
         if (newFile.exists()) {
             newFile.delete();
         }
-        return toBeRenamed.renameTo(newFile);
+        boolean res=toBeRenamed.renameTo(newFile);
+        return res;
     }
 
 
@@ -207,4 +218,31 @@ public class TransferServiceImpl implements TransferService {
         }
         return false;
     }
+//    private static void clean(MappedByteBuffer map) {
+//        try {
+//            Method getCleanerMethod = map.getClass().getMethod("cleaner");
+//            Cleaner.create(map, null);
+//            getCleanerMethod.setAccessible(true);
+//            Cleaner cleaner = (Cleaner) getCleanerMethod.invoke(map);
+//            cleaner.clean();
+//        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+//            e.printStackTrace();
+//        }
+//    }
+private static void clean(MappedByteBuffer map) {
+    try {
+        Method getCleanerMethod = map.getClass().getMethod("cleaner");
+        getCleanerMethod.setAccessible(true);
+        Object cleanerObj = getCleanerMethod.invoke(map);
+
+        Method cleanMethod = cleanerObj.getClass().getMethod("clean");
+        cleanMethod.invoke(cleanerObj);
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        e.printStackTrace();
+    }
+}
+
+
+
+
 }
