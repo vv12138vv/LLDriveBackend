@@ -71,6 +71,7 @@ public class TransferController {
         try{
             FileInputStream in=new FileInputStream(file.getPath());
             resp.setHeader("Content-Disposition","attachment;filename="+userFile.getFileName());
+            resp.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             BufferedOutputStream out=new BufferedOutputStream(resp.getOutputStream());
             byte []b=new byte[1024];
             int len;

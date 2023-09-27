@@ -65,9 +65,6 @@ public class FileController {
             return userResp;
         }
         User user=(User) userResp.getData();
-        if(userFileListReq.getDirId()==null){
-            userFileListReq.setDirId("");
-        }
         return userFileService.listUserFilesByPage(user, userFileListReq.getDirId(),pageNo,pageSize);
     }
 
