@@ -12,16 +12,19 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Select("select * from user_files where repo_id=#{repoId} and file_id=#{fileId}")
     UserFile selectUserFileByRepoIdAndFileId(@Param("repoId")String repoId, @Param("fileId")String fileId);
 
-    @Select("select * from user_files where repo_id=#{repoId} and file_name=#{fileName} and  dir_id=#{dirId}")
+    @Select("select * from user_files where repo_id=#{repoId} and file_name=#{fileName} and  dir_id=#{dirId} and is_deleted=0")
     UserFile selectUserFileBytRepoIdAndFileNameAndDirID(@Param("repoId")String repoId,@Param("fileName")String fileName,@Param("dirId")String dirId);
 
-    @Select("select * from user_files where repo_id=#{repoId} and dir_id=#{dirId}")
+    @Select("select * from user_files where repo_id=#{repoId} and dir_id=#{dirId} and is_deleted=0")
     List<UserFile>  selectUserFilesByRepoIdAndDirId(@Param("repoId")String repoId,@Param("dirId")String dirId);
-
-    @Select("select * from user_files where user_file_id=#{userFileId}")
+    @Select("select COUNT(*) from user_files where repo_id=#{repoId} and is_deleted=0 and dir_id=#{dirId}")
+    Integer countUserFilesByRepoIdAndDirId(@Param("repoId")String repoId,@Param("dirId")String dirId);
+    @Select("select * from user_files where repo_id=#{repoId} and dir_id=#{dirId} and is_deleted=0 order by id ASC limit #{pageSize} offset #{offset}")
+    List<UserFile> selectUserFilesByRepoIdAndDirIdPage(@Param("repoId")String repoId,@Param("dirId")String dirId,@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
+    @Select("select * from user_files where user_file_id=#{userFileId} and is_deleted=0")
     UserFile selectUserFileByUserFileId(@Param("userFileId")String userFileId);
 
-    @Select("select * from user_files where dir_id=#{dirId}")
+    @Select("select * from user_files where dir_id=#{dirId} and is_deleted=0")
     List<UserFile> selectUserFilesByDirId(@Param("dirId")String dirId);
 
     @Update("update user_files set is_deleted=#{deleted} where user_file_id=#{userFileId}")
@@ -30,13 +33,13 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Update("update user_files set is_deleted=#{deleted} where dir_id=#{dirId} and repo_id=#{repoId}")
     int updateUserFilesDeleted(@Param("dirId")String dirId,@Param("repoId")String repoId,@Param("deleted")boolean deleted);
 
-    @Select("select * from user_files where dir_id=#{dirId} and is_dir=1")
+    @Select("select * from user_files where dir_id=#{dirId} and is_dir=1 and is_deleted=0")
     List<UserFile> selectDirsByDirId(@Param("dirId")String dirId);
 
-    @Select("select * from user_files where repo_id=#{repoId} and file_name like concat('%',#{fileName},'%')")
+    @Select("select * from user_files where repo_id=#{repoId}  and is_deleted=0 and file_name like concat('%',#{fileName},'%')")
     List<UserFile> selectUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName);
 
-    @Update("update user_files set file_name=#{newName} where user_file_id=#{userFileId}")
+    @Update("update user_files set file_name=#{newName} and is_deleted=0 where user_file_id=#{userFileId}")
     int updateUserFileName(@Param("userFileId")String userFileId,@Param("newName")String newName);
 
     @Update("update user_files set dir_id=#{dirId} where user_file_id=#{userFileId}")

@@ -17,10 +17,7 @@ import com.lldrive.service.UserFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 import static com.lldrive.domain.consts.Const.UUID_LENGTH;
 
@@ -47,8 +44,12 @@ public class UserFileServiceImpl implements UserFileService {
         UserFile uploadFile=new UserFile();
         uploadFile.setFileId(file.getFileId());
         uploadFile.setFileName(uploadFileReq.getFileName());
-        uploadFile.setIsDir(uploadFileReq.getDir());
-        uploadFile.setDirId(uploadFileReq.getDirId());
+        uploadFile.setIsDir(uploadFileReq.getIsDir());
+        if(uploadFileReq.getDirId()==null){
+            uploadFile.setDirId(new String(""));
+        }else{
+            uploadFile.setDirId(uploadFileReq.getDirId());
+        }
         uploadFile.setUserFileId(UUIDUtil.generate(UUID_LENGTH));
         uploadFile.setType(file.getType());
         uploadFile.setRepoId(uploadUser.getRepoId());
@@ -86,6 +87,22 @@ public class UserFileServiceImpl implements UserFileService {
         List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirId(user.getRepoId(),dirId);
         return new CommonResp<List<UserFile>>(Status.SUCCESS,userFiles);
     }
+    @Override
+    public CommonResp listUserFilesByPage(User user,String dirId,Integer pageNo,Integer pageSize){
+        Integer count= userFileMapper.countUserFilesByRepoIdAndDirId(user.getRepoId(),dirId);
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirIdPage(user.getRepoId(),dirId,pageSize,offset);
+        Integer totalCount=userFiles.size();
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",totalCount);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",userFiles);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
 
     @Override
     public CommonResp createDir(User user, String dirId, String dirName) {

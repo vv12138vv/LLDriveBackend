@@ -22,6 +22,8 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -36,7 +38,7 @@ public class TransferController {
     @PostMapping("/upload")
     public CommonResp upload(UploadFileReq uploadFileReq) {
         CommonResp resp = transferService.upload(uploadFileReq);
-        if (resp.getData() == null) {
+        if (!Objects.equals(resp.getStatusCode(), Status.SUCCESS.getCode())) {
             return resp;
         }
         File file = (File) resp.getData();
@@ -44,7 +46,9 @@ public class TransferController {
         if(addResp.getData()==null){
             return addResp;
         }
-        return new CommonResp(Status.SUCCESS);
+        Map<String,String> res=new HashMap<>();
+        res.put("status","upload_finish");
+        return new CommonResp(Status.SUCCESS,res);
     }
 
     @GetMapping("/upload")
@@ -67,6 +71,7 @@ public class TransferController {
         try{
             FileInputStream in=new FileInputStream(file.getPath());
             resp.setHeader("Content-Disposition","attachment;filename="+userFile.getFileName());
+            resp.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             BufferedOutputStream out=new BufferedOutputStream(resp.getOutputStream());
             byte []b=new byte[1024];
             int len;

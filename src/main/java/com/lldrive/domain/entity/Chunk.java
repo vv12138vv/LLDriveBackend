@@ -18,6 +18,6 @@ public class Chunk {
     private Integer chunkNumber;
     @TableField("cur_chunk_size")
     private Long currentChunkSize;//当前分片大小
-    @TableField("upload_time")
+    @TableField("is_upload")
     private Boolean isUpload;
 }
