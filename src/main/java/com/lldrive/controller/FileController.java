@@ -1,6 +1,7 @@
 package com.lldrive.controller;
 
 import com.lldrive.domain.entity.UserFile;
+import com.lldrive.domain.req.ListRecycleReq;
 import com.lldrive.domain.req.MkDirReq;
 import com.lldrive.domain.req.MoveFileReq;
 import com.lldrive.domain.req.UserFileListReq;
@@ -113,15 +114,18 @@ public class FileController {
         return userFileService.moveUserFile(moveFileReq);
     }
 
-    @GetMapping("/list/recycle")
-    CommonResp listRecycle(@RequestParam("username")String username){
-        CommonResp userResp=userService.findUser(username);
+    @PostMapping("/list/recycle")
+    CommonResp listRecycle(@RequestBody ListRecycleReq listRecycleReq){
+        Integer pageNo=Integer.parseInt(listRecycleReq.getPageNo());
+        Integer pageSize=Integer.parseInt(listRecycleReq.getPageSize());
+        CommonResp userResp=userService.findUser(listRecycleReq.getUsername());
         if(userResp.getData()==null) {
             return userResp;
         }
         User user=(User)userResp.getData();
-        return userFileService.listDeletedUserFiles(user);
+        return userFileService.listRecycleByPage(user,pageNo,pageSize);
     }
+
 
     @GetMapping("/recover")
     CommonResp recoverFile(@RequestParam("user_file_id")String userFileId,@RequestParam("username")String username){

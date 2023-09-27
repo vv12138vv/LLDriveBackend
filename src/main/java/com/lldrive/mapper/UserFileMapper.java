@@ -19,9 +19,11 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     List<UserFile>  selectUserFilesByRepoIdAndDirId(@Param("repoId")String repoId,@Param("dirId")String dirId);
     @Select("select COUNT(*) from user_files where repo_id=#{repoId} and is_deleted=0 and dir_id=#{dirId}")
     Integer countUserFilesByRepoIdAndDirId(@Param("repoId")String repoId,@Param("dirId")String dirId);
+    @Select("select COUNT(*) from user_files where repo_id=#{repoId} and is_deleted=1")
+    Integer countRecycleByRepo(@Param("repoId")String repoId);
     @Select("select * from user_files where repo_id=#{repoId} and dir_id=#{dirId} and is_deleted=0 order by id ASC limit #{pageSize} offset #{offset}")
     List<UserFile> selectUserFilesByRepoIdAndDirIdPage(@Param("repoId")String repoId,@Param("dirId")String dirId,@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
-    @Select("select * from user_files where user_file_id=#{userFileId} and is_deleted=0")
+    @Select("select * from user_files where user_file_id=#{userFileId}")
     UserFile selectUserFileByUserFileId(@Param("userFileId")String userFileId);
 
     @Select("select * from user_files where dir_id=#{dirId} and is_deleted=0")
@@ -46,8 +48,8 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     int updateUserFileDir(@Param("userFileId")String userFileId,@Param("dirId")String dirId);
 
 
-    @Select("select * from user_files where repo_id=#{repoId} and is_deleted=1 and (dir_id='' or dir_id not in (select user_file_id from user_files where is_deleted=1 and repo_id=#{repoId})) ")
-    List<UserFile> selectDeletedFiles(@Param("repoId")String repoId);
+    @Select("select * from user_files where repo_id=#{repoId} and is_deleted=1 and (dir_id='' or dir_id not in (select user_file_id from user_files where is_deleted=1 and repo_id=#{repoId})) order by id ASC limit #{pageSize} offset #{offset} ")
+    List<UserFile> selectDeletedFiles(@Param("repoId")String repoId,@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
 
     @Update("update user_files set size=size+#{fileSize} where user_file_id=#{userFileId}")
     int updateUserFileSize(@Param("userFileId")String userFileId,@Param("fileSize")Long fileSize);

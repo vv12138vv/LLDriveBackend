@@ -16,6 +16,7 @@ public interface UserFileService {
     CommonResp<List<UserFile>> listUserFiles(User user, String dirId);
 
     CommonResp listUserFilesByPage(User user,String dirId,Integer pageNo,Integer pageSize);
+    CommonResp listRecycleByPage(User user,Integer pageNo,Integer pageSize);
     CommonResp<List<UserFile>> searchUserFiles(User user,String fileName);
     CommonResp createDir(User user,String dirId,String dirName);
     CommonResp deleteUserFile(User user,String userFileId);

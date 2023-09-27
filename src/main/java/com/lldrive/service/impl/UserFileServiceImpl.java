@@ -102,6 +102,21 @@ public class UserFileServiceImpl implements UserFileService {
         result.put("list",userFiles);
         return new CommonResp<>(Status.SUCCESS,result);
     }
+    @Override
+    public CommonResp listRecycleByPage(User user,Integer pageNo,Integer pageSize){
+        Integer count= userFileMapper.countRecycleByRepo(user.getRepoId());
+        Integer pageTotal=(count/pageSize)+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId(),pageSize,offset);
+        Integer totalCount=deletedFiles.size();
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",totalCount);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",deletedFiles);
+        return new CommonResp(Status.SUCCESS,result);
+    }
 
 
     @Override
@@ -218,9 +233,11 @@ public class UserFileServiceImpl implements UserFileService {
     }
     @Override
     public CommonResp<List<UserFile>> listDeletedUserFiles(User user){
-        List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId());
-        return new CommonResp<List<UserFile>>(Status.SUCCESS,deletedFiles);
+//        List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId());
+//        return new CommonResp<List<UserFile>>(Status.SUCCESS,deletedFiles);
+        return null;
     }
+
 
 
     @Override
