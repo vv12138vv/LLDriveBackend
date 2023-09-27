@@ -12,6 +12,7 @@ import com.lldrive.mapper.FileMapper;
 import com.lldrive.mapper.UserFileMapper;
 import com.lldrive.service.TransferService;
 import com.lldrive.service.UserFileService;
+import io.lettuce.core.StrAlgoArgs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,16 +22,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
+//import java.lang.ref.Cleaner;
+
 import java.lang.ref.Cleaner;
 import java.lang.reflect.InvocationTargetException;
+
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.lldrive.domain.consts.Const.*;
@@ -154,9 +155,14 @@ public class TransferServiceImpl implements TransferService {
         }
         //写入分片数据
         FileChannel fc=raf.getChannel();
-        MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());//将文件的一部分映射到内存中方便读写
-        map.put(file.getBytes());//写入
-        map.reset();
+//        MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());//将文件的一部分映射到内存中方便读写
+//        map.put(file.getBytes());//写入
+//        clean(map);
+        ByteBuffer buffer= ByteBuffer.allocate((int) file.getSize());
+        buffer.put(file.getBytes());
+        buffer.flip();
+        fc.position(position);
+        fc.write(buffer);
         fc.close();
         raf.close();
         //记录已完成的分片
@@ -229,18 +235,28 @@ public class TransferServiceImpl implements TransferService {
 //            e.printStackTrace();
 //        }
 //    }
-private static void clean(MappedByteBuffer map) {
-    try {
-        Method getCleanerMethod = map.getClass().getMethod("cleaner");
-        getCleanerMethod.setAccessible(true);
-        Object cleanerObj = getCleanerMethod.invoke(map);
-
-        Method cleanMethod = cleanerObj.getClass().getMethod("clean");
-        cleanMethod.invoke(cleanerObj);
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-        e.printStackTrace();
-    }
-}
+//private static void clean(MappedByteBuffer map) {
+//    try {
+//        Method getCleanerMethod = map.getClass().getMethod("cleaner");
+//        getCleanerMethod.setAccessible(true);
+//        Object cleanerObj = getCleanerMethod.invoke(map);
+//
+//        Method cleanMethod = cleanerObj.getClass().getMethod("clean");
+//        cleanMethod.invoke(cleanerObj);
+//    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+//        e.printStackTrace();
+//    }
+//}
+//    private static void clean(MappedByteBuffer map){
+//        try{
+//            Method cleanMethond=map.getClass().getMethod("cleaner");
+//            cleanMethond.setAccessible(true);
+//            Cleaner cleaner=(Cleaner) cleanMethond.invoke(map);
+//            cleaner.clean();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//    }
 
 
 

@@ -3,6 +3,7 @@ package com.lldrive.controller;
 import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.MkDirReq;
 import com.lldrive.domain.req.MoveFileReq;
+import com.lldrive.domain.req.UserFileListReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.types.Status;
 import com.lldrive.service.UserFileService;
@@ -50,6 +51,18 @@ public class FileController {
             }
         }
         return resp;
+    }
+
+    @PostMapping("/list")
+    CommonResp listUserFiles(@Validated @RequestBody UserFileListReq userFileListReq){
+        Integer pageNo=Integer.parseInt(userFileListReq.getPageNo());
+        Integer pageSize=Integer.parseInt(userFileListReq.getPageSize());
+        CommonResp userResp=userService.findUser(userFileListReq.getUsername());
+        if(userResp.getData()==null){
+            return userResp;
+        }
+        User user=(User) userResp.getData();
+        return userFileService.listUserFilesByPage(user, userFileListReq.getDirId(),pageNo,pageSize);
     }
 
     @PostMapping("/mkdir")

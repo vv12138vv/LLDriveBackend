@@ -17,7 +17,10 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
 
     @Select("select * from user_files where repo_id=#{repoId} and dir_id=#{dirId}")
     List<UserFile>  selectUserFilesByRepoIdAndDirId(@Param("repoId")String repoId,@Param("dirId")String dirId);
-
+    @Select("select COUNT(*) from user_files where repo_id=#{repoId} and dir_id=#{dirId}")
+    Integer countUserFilesByRepoIdAndDirId(@Param("repoId")String repoId,@Param("dirId")String dirId);
+    @Select("select * from user_files where repo_id=#{repoId} and dir_id=#{dirId} order by id ASC limit #{pageSize} offset #{offset}")
+    List<UserFile> selectUserFilesByRepoIdAndDirIdPage(@Param("repoId")String repoId,@Param("dirId")String dirId,@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
     @Select("select * from user_files where user_file_id=#{userFileId}")
     UserFile selectUserFileByUserFileId(@Param("userFileId")String userFileId);
 

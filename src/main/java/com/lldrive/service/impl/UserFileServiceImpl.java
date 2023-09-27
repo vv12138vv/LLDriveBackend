@@ -17,10 +17,7 @@ import com.lldrive.service.UserFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 import static com.lldrive.domain.consts.Const.UUID_LENGTH;
 
@@ -86,6 +83,22 @@ public class UserFileServiceImpl implements UserFileService {
         List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirId(user.getRepoId(),dirId);
         return new CommonResp<List<UserFile>>(Status.SUCCESS,userFiles);
     }
+    @Override
+    public CommonResp listUserFilesByPage(User user,String dirId,Integer pageNo,Integer pageSize){
+        Integer count= userFileMapper.countUserFilesByRepoIdAndDirId(user.getRepoId(),dirId);
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirIdPage(user.getRepoId(),dirId,pageSize,offset);
+        Integer totalCount=userFiles.size();
+        Map<String, Object> result=new HashMap<>();
+        result.put("totalCount",totalCount);
+        result.put("pageSize",pageSize);
+        result.put("pageNo",pageNo);
+        result.put("pageTotal",pageTotal);
+        result.put("list",userFiles);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
 
     @Override
     public CommonResp createDir(User user, String dirId, String dirName) {
