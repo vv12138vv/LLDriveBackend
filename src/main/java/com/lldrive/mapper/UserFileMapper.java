@@ -38,8 +38,10 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Select("select * from user_files where dir_id=#{dirId} and is_dir=1 and is_deleted=0")
     List<UserFile> selectDirsByDirId(@Param("dirId")String dirId);
 
-    @Select("select * from user_files where repo_id=#{repoId}  and is_deleted=0 and file_name like concat('%',#{fileName},'%')")
-    List<UserFile> selectUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName);
+    @Select("select * from user_files where repo_id=#{repoId} and is_deleted=0 and (file_name like concat('%',#{fileName},'%')) order by id ASC limit #{pageSize} offset #{offset}")
+    List<UserFile> selectUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName,@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
+    @Select("select COUNT(*) from user_files where repo_id=#{repoId} and is_deleted=0 and (file_name like concat('%',#{fileName},'%'))")
+    Integer countUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName);
 
     @Update("update user_files set file_name=#{newName} and is_deleted=0 where user_file_id=#{userFileId}")
     int updateUserFileName(@Param("userFileId")String userFileId,@Param("newName")String newName);
@@ -53,4 +55,5 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
 
     @Update("update user_files set size=size+#{fileSize} where user_file_id=#{userFileId}")
     int updateUserFileSize(@Param("userFileId")String userFileId,@Param("fileSize")Long fileSize);
+
 }

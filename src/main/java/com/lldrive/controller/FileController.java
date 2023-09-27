@@ -66,7 +66,11 @@ public class FileController {
             return userResp;
         }
         User user=(User) userResp.getData();
-        return userFileService.listUserFilesByPage(user, userFileListReq.getDirId(),pageNo,pageSize);
+        if(userFileListReq.getFileName()==null||userFileListReq.equals("")){
+            return userFileService.listUserFilesByPage(user, userFileListReq.getDirId(),pageNo,pageSize);
+        }else{
+            return userFileService.listSearchUserFileByPage(user,userFileListReq.getFileName(),pageNo,pageSize);
+        }
     }
 
     @PostMapping("/mkdir")
@@ -93,16 +97,16 @@ public class FileController {
         return userFileService.deleteUserFile(user,userFileId);
     }
 
-    @GetMapping("/search")
-    CommonResp searchFile(@RequestParam("username")String username,@RequestParam("file_name")String fileName){//支持模糊搜索
-        CommonResp userResp=userService.findUser(username);
-        if(userResp.getData()==null){
-            return userResp;
-        }
-        User user=(User)userResp.getData();
-        CommonResp<List<UserFile>> searchResult=userFileService.searchUserFiles(user,fileName);
-        return searchResult;
-    }
+//    @GetMapping("/search")
+//    CommonResp searchFile(@RequestParam("username")String username,@RequestParam("file_name")String fileName){//支持模糊搜索
+//        CommonResp userResp=userService.findUser(username);
+//        if(userResp.getData()==null){
+//            return userResp;
+//        }
+//        User user=(User)userResp.getData();
+//        CommonResp<List<UserFile>> searchResult=userFileService.searchUserFiles(user,fileName);
+//        return searchResult;
+//    }
 
     @GetMapping("/rename")
     CommonResp renameFile(@RequestParam("user_file_id")String userFileId,@RequestParam("new_name")String newName){

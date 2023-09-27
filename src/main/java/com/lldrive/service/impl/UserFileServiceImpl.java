@@ -102,6 +102,21 @@ public class UserFileServiceImpl implements UserFileService {
         result.put("list",userFiles);
         return new CommonResp<>(Status.SUCCESS,result);
     }
+    public CommonResp listSearchUserFileByPage(User user, String fileName, Integer pageNo, Integer pageSize){
+        Integer count= userFileMapper.countUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName,pageSize,offset);
+        Integer totalCount=userFiles.size();
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",totalCount);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",userFiles);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
     @Override
     public CommonResp listRecycleByPage(User user,Integer pageNo,Integer pageSize){
         Integer count= userFileMapper.countRecycleByRepo(user.getRepoId());
@@ -176,11 +191,12 @@ public class UserFileServiceImpl implements UserFileService {
 
     @Override
     public CommonResp<List<UserFile>> searchUserFiles(User user, String fileName) {
-        List<UserFile> searchResult=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
-        if(searchResult.size()==0){
-            return new CommonResp (Status.FILE_NOT_EXIST);
-        }
-        return new CommonResp<List<UserFile>>(Status.SUCCESS,searchResult);
+//        List<UserFile> searchResult=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
+//        if(searchResult.size()==0){
+//            return new CommonResp (Status.FILE_NOT_EXIST);
+//        }
+//        return new CommonResp<List<UserFile>>(Status.SUCCESS,searchResult);
+        return null;
     }
 
     @Override

@@ -11,6 +11,8 @@ public class UserFileListReq {
     private String dirId;
     @JsonProperty("type")
     private String type;
+    @JsonProperty("file_name")
+    private String fileName;
     @JsonProperty("page_no")
     private String pageNo;
     @JsonProperty("page_size")

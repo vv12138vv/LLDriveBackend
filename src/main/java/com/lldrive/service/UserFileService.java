@@ -25,4 +25,7 @@ public interface UserFileService {
     CommonResp moveUserFile(MoveFileReq moveFileReq);
     CommonResp<List<UserFile>> listDeletedUserFiles(User user);
     CommonResp recoverUserFile(User user,String userFileId);
+
+    CommonResp listSearchUserFileByPage(User user, String fileName, Integer pageNo, Integer pageSize);
+
 }
