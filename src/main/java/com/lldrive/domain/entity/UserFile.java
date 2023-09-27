@@ -26,7 +26,7 @@ public class UserFile {
     private String fileId;
     @TableField("type")
     @JsonProperty("type")
-    private String type;
+    private Integer type;
     @TableField(value = "file_name")
     @JsonProperty(("file_name"))
     private String fileName;

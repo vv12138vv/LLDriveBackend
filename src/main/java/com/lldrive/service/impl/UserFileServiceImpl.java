@@ -1,5 +1,6 @@
 package com.lldrive.service.impl;
 
+import com.lldrive.Utils.FileExtensionUtil;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.Repo;
 import com.lldrive.domain.entity.User;
@@ -51,7 +52,7 @@ public class UserFileServiceImpl implements UserFileService {
             uploadFile.setDirId(uploadFileReq.getDirId());
         }
         uploadFile.setUserFileId(UUIDUtil.generate(UUID_LENGTH));
-        uploadFile.setType(file.getType());
+        uploadFile.setType(FileExtensionUtil.getMappingValue(file.getType()));
         uploadFile.setRepoId(uploadUser.getRepoId());
         uploadFile.setSize(file.getSize());
         int res=userFileMapper.insert(uploadFile);
