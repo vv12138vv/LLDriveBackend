@@ -44,8 +44,12 @@ public class UserFileServiceImpl implements UserFileService {
         UserFile uploadFile=new UserFile();
         uploadFile.setFileId(file.getFileId());
         uploadFile.setFileName(uploadFileReq.getFileName());
-        uploadFile.setIsDir(uploadFileReq.getDir());
-        uploadFile.setDirId(uploadFileReq.getDirId());
+        uploadFile.setIsDir(uploadFileReq.getIsDir());
+        if(uploadFileReq.getDirId()==null){
+            uploadFile.setDirId(new String(""));
+        }else{
+            uploadFile.setDirId(uploadFileReq.getDirId());
+        }
         uploadFile.setUserFileId(UUIDUtil.generate(UUID_LENGTH));
         uploadFile.setType(file.getType());
         uploadFile.setRepoId(uploadUser.getRepoId());
@@ -91,10 +95,10 @@ public class UserFileServiceImpl implements UserFileService {
         List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirIdPage(user.getRepoId(),dirId,pageSize,offset);
         Integer totalCount=userFiles.size();
         Map<String, Object> result=new HashMap<>();
-        result.put("totalCount",totalCount);
-        result.put("pageSize",pageSize);
-        result.put("pageNo",pageNo);
-        result.put("pageTotal",pageTotal);
+        result.put("total_count",totalCount);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
         result.put("list",userFiles);
         return new CommonResp<>(Status.SUCCESS,result);
     }

@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 public class UploadFileReq {
     @NotBlank
     private String username;
-    private Boolean dir;//是否是文件夹
+    private Boolean isDir;//是否是文件夹
     private String dirId;//父文件夹的user_file_id
     @NotNull
     private Boolean chunkFlag;//是否分片

@@ -55,6 +55,9 @@ public class FileController {
 
     @PostMapping("/list")
     CommonResp listUserFiles(@Validated @RequestBody UserFileListReq userFileListReq){
+        if(userFileListReq.getDirId()==null){
+            userFileListReq.setDirId("");
+        }
         Integer pageNo=Integer.parseInt(userFileListReq.getPageNo());
         Integer pageSize=Integer.parseInt(userFileListReq.getPageSize());
         CommonResp userResp=userService.findUser(userFileListReq.getUsername());
@@ -62,6 +65,9 @@ public class FileController {
             return userResp;
         }
         User user=(User) userResp.getData();
+        if(userFileListReq.getDirId()==null){
+            userFileListReq.setDirId("");
+        }
         return userFileService.listUserFilesByPage(user, userFileListReq.getDirId(),pageNo,pageSize);
     }
 
