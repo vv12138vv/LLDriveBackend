@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Validated
@@ -153,6 +155,18 @@ public class FileController {
         User user=(User)userResp.getData();
         return userFileService.truelyDeleteUserFile(user,userFileId);
 
+    }
+
+    @GetMapping("/dir")
+    CommonResp dirName(@RequestParam("user_file_id")String userFileId){
+        CommonResp userFileResp=userFileService.findUserFile(userFileId);
+        if(userFileResp.getData()==null){
+            return userFileResp;
+        }
+        UserFile userFile=(UserFile) userFileResp.getData();
+        Map<String,Object> res=new HashMap<>();
+        res.put("file_name",userFile.getFileName());
+        return new CommonResp(Status.SUCCESS,res);
     }
 
 
