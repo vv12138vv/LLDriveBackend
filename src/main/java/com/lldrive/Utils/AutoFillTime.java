@@ -17,6 +17,7 @@ public class AutoFillTime implements MetaObjectHandler {
      }
      @Override
     public void updateFill(MetaObject metaObject){
-         strictUpdateFill(metaObject,"updateTime",LocalDateTime.class,LocalDateTime.now());
+         strictInsertFill(metaObject,"updateTime",Timestamp.class,Timestamp.valueOf(LocalDateTime.now()));
+
      }
 }
