@@ -28,4 +28,6 @@ public interface UserFileService {
 
     CommonResp listSearchUserFileByPage(User user, String fileName, Integer pageNo, Integer pageSize);
 
+    CommonResp truelyDeleteUserFile(User user, String userFileId);
+
 }

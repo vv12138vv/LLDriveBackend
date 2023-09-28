@@ -191,6 +191,46 @@ public class UserFileServiceImpl implements UserFileService {
     }
 
     @Override
+    public CommonResp truelyDeleteUserFile(User user, String userFileId){
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(userFileId);
+        if(userFile==null){
+            return new CommonResp(Status.FILE_NOT_EXIST);
+        }
+        if(!userFile.getIsDir()){//若不是文件夹
+//            int res=userFileMapper.updateUserFileDeleted(userFileId,true);
+            int res=userFileMapper.deleteById(userFile.getId());
+            if(res==1){
+                repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
+                return new CommonResp(Status.SUCCESS);
+            }
+            return new CommonResp(Status.SYSTEM_ERROR);
+        }
+        List<UserFile> deleteDirs=new LinkedList<UserFile>();//记录文件夹
+        Queue<UserFile> queue=new LinkedList<UserFile>();//辅助队列
+        deleteDirs.add(userFile);
+        queue.add(userFile);
+        while(!queue.isEmpty()){
+            UserFile temp=queue.poll();
+            List<UserFile> dirs=userFileMapper.selectDirsByDirId(temp.getUserFileId());
+            for(UserFile dir:dirs){
+                queue.add(dir);
+                deleteDirs.add(dir);
+            }
+        }
+        for(UserFile dir:deleteDirs){
+            if(dir.getDirId()!=null){
+//                userFileMapper.updateUserFilesDeleted(dir.getUserFileId(),user.getRepoId(),true);//使该目录下的所有文件逻辑删除
+                userFileMapper.deleteUserFilesInRecycle(user.getRepoId(),dir.getUserFileId());
+            }
+        }
+//        userFileMapper.updateUserFileDeleted(userFileId,true);
+        userFileMapper.deleteById(userFile.getId());
+        this.updateDirSize(userFileId,false);
+        repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
+        return new CommonResp(Status.SUCCESS);
+    }
+
+    @Override
     public CommonResp<List<UserFile>> searchUserFiles(User user, String fileName) {
 //        List<UserFile> searchResult=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
 //        if(searchResult.size()==0){

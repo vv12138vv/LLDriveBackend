@@ -2,6 +2,7 @@ package com.lldrive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lldrive.domain.entity.UserFile;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -34,6 +35,9 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
 
     @Update("update user_files set is_deleted=#{deleted} where dir_id=#{dirId} and repo_id=#{repoId}")
     int updateUserFilesDeleted(@Param("dirId")String dirId,@Param("repoId")String repoId,@Param("deleted")boolean deleted);
+
+    @Delete("delete from user_files where repo_id=#{repoId} and dir_id=#{dirId} and is_deleted=1")
+    int deleteUserFilesInRecycle(@Param("repoId")String repoId,@Param("dirId")String dirId);
 
     @Select("select * from user_files where dir_id=#{dirId} and is_dir=1 and is_deleted=0")
     List<UserFile> selectDirsByDirId(@Param("dirId")String dirId);

@@ -141,5 +141,16 @@ public class FileController {
         return userFileService.recoverUserFile(user,userFileId);
     }
 
+    @GetMapping("/recycle/delete")
+    CommonResp truelyDetele(@RequestParam("username")String username,@RequestParam("user_file_id")String userFileId){
+        CommonResp userResp=userService.findUser(username);
+        if(userResp.getData()==null){
+            return userResp;
+        }
+        User user=(User)userResp.getData();
+        return userFileService.truelyDeleteUserFile(user,userFileId);
+
+    }
+
 
 }
