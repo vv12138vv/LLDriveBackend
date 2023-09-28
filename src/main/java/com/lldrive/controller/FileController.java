@@ -75,6 +75,9 @@ public class FileController {
 
     @PostMapping("/mkdir")
     CommonResp createDir(@Validated @RequestBody MkDirReq mkDirReq){
+        if(mkDirReq.getDirId()==null){
+            mkDirReq.setDirId("");
+        }
         CommonResp userResp=userService.findUser(mkDirReq.getUsername());
         if(userResp.getData()==null){
             return userResp;
