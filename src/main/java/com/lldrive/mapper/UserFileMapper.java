@@ -47,7 +47,7 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Select("select COUNT(*) from user_files where repo_id=#{repoId} and is_deleted=0 and (file_name like concat('%',#{fileName},'%'))")
     Integer countUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName);
 
-    @Update("update user_files set file_name=#{newName} and is_deleted=0 where user_file_id=#{userFileId}")
+    @Update("update user_files set file_name=#{newName} where user_file_id=#{userFileId} and is_deleted=0")
     int updateUserFileName(@Param("userFileId")String userFileId,@Param("newName")String newName);
 
     @Update("update user_files set dir_id=#{dirId} where user_file_id=#{userFileId}")
