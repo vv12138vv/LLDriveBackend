@@ -74,6 +74,7 @@ public class UserFileServiceImpl implements UserFileService {
         newUserFile.setFileId(userFile.getFileId());
         newUserFile.setRepoId(user.getRepoId());
         newUserFile.setIsDir(userFile.getIsDir());
+        newUserFile.setSize(userFile.getSize());
         int res=userFileMapper.insert(newUserFile);
         if(res==1){
             this.updateDirSize(userFile.getUserFileId(),true);//更新父文件大小

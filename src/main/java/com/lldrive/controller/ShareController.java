@@ -42,15 +42,25 @@ public class ShareController {
         }
         UserFile userFile=(UserFile)userFileResp.getData();
         shareService.updateSharedCount(sharedFile.getSharedId());
+        shareService.cleanExpireShare();
         return userFileService.addFileToUser(userFile,user, saveFileReq.getDirId());
     }
     @PostMapping("")
     CommonResp shareFile(@Validated @RequestBody ShareFileReq shareFileReq){
+        shareService.cleanExpireShare();
         return shareService.shareFile(shareFileReq);
     }
 
     @GetMapping("/list")
-    CommonResp listSharedFile(){
-        return shareService.listShareRecord();
+    CommonResp listSharedFile(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize){
+        Integer pageNo=Integer.parseInt(reqPageNo);
+        Integer pageSize=Integer.parseInt(reqPageSize);
+        shareService.cleanExpireShare();
+        return shareService.listShareRecord(pageNo,pageSize);
+    }
+
+    @GetMapping("/clean")
+    CommonResp cleanExpireShare(){
+        return  shareService.cleanExpireShare();
     }
 }

@@ -10,5 +10,7 @@ public interface ShareService {
 
     CommonResp updateSharedCount(String sharedId);
 
-    CommonResp listShareRecord();
+    CommonResp listShareRecord(Integer pageNo,Integer pageSize);
+
+    CommonResp cleanExpireShare();
 }

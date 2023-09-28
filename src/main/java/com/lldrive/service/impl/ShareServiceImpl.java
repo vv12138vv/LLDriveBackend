@@ -18,7 +18,9 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.lldrive.domain.consts.Const.UUID_LENGTH;
 
@@ -53,6 +55,8 @@ public class ShareServiceImpl implements ShareService {
         LocalDateTime localDateTime=sharedFile.getShareTime().toLocalDateTime();
         LocalDateTime expireTime=localDateTime.plusMinutes(shareFileReq.getExpireTime());
         sharedFile.setExpireTime(Timestamp.valueOf(expireTime));
+        sharedFile.setFileName(userFile.getFileName());
+        sharedFile.setType(userFile.getType());
         int res=shareMapper.insert(sharedFile);
         if(res==1){
             return new CommonResp(Status.SUCCESS);
@@ -69,11 +73,26 @@ public class ShareServiceImpl implements ShareService {
         return new CommonResp(Status.SYSTEM_ERROR);
     }
     @Override
-    public CommonResp listShareRecord(){
-        List<SharedFile> sharedFiles=shareMapper.selectSharedFiles();
-        return new CommonResp(Status.SUCCESS,sharedFiles);
+    public CommonResp listShareRecord(Integer pageNo,Integer pageSize){
+        Integer count=shareMapper.selectSharedCount();
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<SharedFile> sharedFiles=shareMapper.selectSharedFiles(pageSize,offset);
+        Integer totalCount=sharedFiles.size();
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",totalCount);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",sharedFiles);
+        return new CommonResp<>(Status.SUCCESS,result);
     }
 
+    @Override
+    public CommonResp cleanExpireShare(){
+        Integer count=shareMapper.cleanExpireRecord();
+        return new CommonResp(Status.SUCCESS);
+    }
 
 
 }
