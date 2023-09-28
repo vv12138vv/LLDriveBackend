@@ -35,6 +35,11 @@ public class FileExtensionUtil {
         extensionMap.put("xls",6);
         extensionMap.put("xlsx",6);
         extensionMap.put("txt",7);
+        //程序
+        extensionMap.put("c",8);
+        extensionMap.put("py",8);
+        extensionMap.put("cpp",8);
+        extensionMap.put("java",8);
         //压缩包
         extensionMap.put("zip",9);
         extensionMap.put("7z",9);
