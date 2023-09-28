@@ -26,17 +26,23 @@ public class FileExtensionUtil {
         extensionMap.put("jpeg",3);
         extensionMap.put("svg",3);
         extensionMap.put("gif",3);
-        //doc
+        //文档
         extensionMap.put("pdf",4);
-        extensionMap.put("doc",4);
-        extensionMap.put("docx",4);
-        extensionMap.put("xls",4);
         extensionMap.put("md",4);
-        extensionMap.put("txt",4);
+        //特殊文档
+        extensionMap.put("doc",5);
+        extensionMap.put("docx",5);
+        extensionMap.put("xls",6);
+        extensionMap.put("xlsx",6);
+        extensionMap.put("txt",7);
+        //压缩包
+        extensionMap.put("zip",9);
+        extensionMap.put("7z",9);
+        extensionMap.put("rar",9);
     }
 
     public static int getMappingValue(String extension) {
         // 获取给定后缀名的映射值，如果找不到映射关系，则返回默认值或抛出异常，根据需求决定
-        return extensionMap.getOrDefault(extension.toLowerCase(), 0);
+        return extensionMap.getOrDefault(extension.toLowerCase(), 10);
     }
 }
