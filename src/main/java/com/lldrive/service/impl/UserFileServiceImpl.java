@@ -1,5 +1,6 @@
 package com.lldrive.service.impl;
 
+import com.lldrive.Utils.FileExtensionUtil;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.Repo;
 import com.lldrive.domain.entity.User;
@@ -51,7 +52,7 @@ public class UserFileServiceImpl implements UserFileService {
             uploadFile.setDirId(uploadFileReq.getDirId());
         }
         uploadFile.setUserFileId(UUIDUtil.generate(UUID_LENGTH));
-        uploadFile.setType(file.getType());
+        uploadFile.setType(FileExtensionUtil.getMappingValue(file.getType()));
         uploadFile.setRepoId(uploadUser.getRepoId());
         uploadFile.setSize(file.getSize());
         int res=userFileMapper.insert(uploadFile);
@@ -101,6 +102,36 @@ public class UserFileServiceImpl implements UserFileService {
         result.put("page_total",pageTotal);
         result.put("list",userFiles);
         return new CommonResp<>(Status.SUCCESS,result);
+    }
+    public CommonResp listSearchUserFileByPage(User user, String fileName, Integer pageNo, Integer pageSize){
+        Integer count= userFileMapper.countUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName,pageSize,offset);
+        Integer totalCount=userFiles.size();
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",totalCount);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",userFiles);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
+    @Override
+    public CommonResp listRecycleByPage(User user,Integer pageNo,Integer pageSize){
+        Integer count= userFileMapper.countRecycleByRepo(user.getRepoId());
+        Integer pageTotal=(count/pageSize)+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId(),pageSize,offset);
+        Integer totalCount=deletedFiles.size();
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",totalCount);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",deletedFiles);
+        return new CommonResp(Status.SUCCESS,result);
     }
 
 
@@ -160,12 +191,53 @@ public class UserFileServiceImpl implements UserFileService {
     }
 
     @Override
-    public CommonResp<List<UserFile>> searchUserFiles(User user, String fileName) {
-        List<UserFile> searchResult=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
-        if(searchResult.size()==0){
-            return new CommonResp (Status.FILE_NOT_EXIST);
+    public CommonResp truelyDeleteUserFile(User user, String userFileId){
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(userFileId);
+        if(userFile==null){
+            return new CommonResp(Status.FILE_NOT_EXIST);
         }
-        return new CommonResp<List<UserFile>>(Status.SUCCESS,searchResult);
+        if(!userFile.getIsDir()){//若不是文件夹
+//            int res=userFileMapper.updateUserFileDeleted(userFileId,true);
+            int res=userFileMapper.deleteById(userFile.getId());
+            if(res==1){
+                repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
+                return new CommonResp(Status.SUCCESS);
+            }
+            return new CommonResp(Status.SYSTEM_ERROR);
+        }
+        List<UserFile> deleteDirs=new LinkedList<UserFile>();//记录文件夹
+        Queue<UserFile> queue=new LinkedList<UserFile>();//辅助队列
+        deleteDirs.add(userFile);
+        queue.add(userFile);
+        while(!queue.isEmpty()){
+            UserFile temp=queue.poll();
+            List<UserFile> dirs=userFileMapper.selectDirsByDirId(temp.getUserFileId());
+            for(UserFile dir:dirs){
+                queue.add(dir);
+                deleteDirs.add(dir);
+            }
+        }
+        for(UserFile dir:deleteDirs){
+            if(dir.getDirId()!=null){
+//                userFileMapper.updateUserFilesDeleted(dir.getUserFileId(),user.getRepoId(),true);//使该目录下的所有文件逻辑删除
+                userFileMapper.deleteUserFilesInRecycle(user.getRepoId(),dir.getUserFileId());
+            }
+        }
+//        userFileMapper.updateUserFileDeleted(userFileId,true);
+        userFileMapper.deleteById(userFile.getId());
+        this.updateDirSize(userFileId,false);
+        repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
+        return new CommonResp(Status.SUCCESS);
+    }
+
+    @Override
+    public CommonResp<List<UserFile>> searchUserFiles(User user, String fileName) {
+//        List<UserFile> searchResult=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
+//        if(searchResult.size()==0){
+//            return new CommonResp (Status.FILE_NOT_EXIST);
+//        }
+//        return new CommonResp<List<UserFile>>(Status.SUCCESS,searchResult);
+        return null;
     }
 
     @Override
@@ -218,9 +290,11 @@ public class UserFileServiceImpl implements UserFileService {
     }
     @Override
     public CommonResp<List<UserFile>> listDeletedUserFiles(User user){
-        List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId());
-        return new CommonResp<List<UserFile>>(Status.SUCCESS,deletedFiles);
+//        List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId());
+//        return new CommonResp<List<UserFile>>(Status.SUCCESS,deletedFiles);
+        return null;
     }
+
 
 
     @Override

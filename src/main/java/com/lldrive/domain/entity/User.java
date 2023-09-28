@@ -1,6 +1,7 @@
 package com.lldrive.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.req.RegisterReq;
 import lombok.Data;

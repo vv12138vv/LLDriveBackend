@@ -1,6 +1,7 @@
 package com.lldrive.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -25,7 +26,7 @@ public class UserFile {
     private String fileId;
     @TableField("type")
     @JsonProperty("type")
-    private String type;
+    private Integer type;
     @TableField(value = "file_name")
     @JsonProperty(("file_name"))
     private String fileName;
@@ -40,12 +41,15 @@ public class UserFile {
     private Long size;
     @TableField(value = "create_time",fill= FieldFill.INSERT)
     @JsonProperty("create_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
     private Timestamp createTime;
     @TableField(value = "update_time",fill=FieldFill.INSERT_UPDATE)
     @JsonProperty("update_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
     private Timestamp updateTime;
     @TableField(value = "delete_time")
     @JsonProperty("delete_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
     private Timestamp deleteTime;
 
 

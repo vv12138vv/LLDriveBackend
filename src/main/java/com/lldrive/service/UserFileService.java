@@ -16,6 +16,7 @@ public interface UserFileService {
     CommonResp<List<UserFile>> listUserFiles(User user, String dirId);
 
     CommonResp listUserFilesByPage(User user,String dirId,Integer pageNo,Integer pageSize);
+    CommonResp listRecycleByPage(User user,Integer pageNo,Integer pageSize);
     CommonResp<List<UserFile>> searchUserFiles(User user,String fileName);
     CommonResp createDir(User user,String dirId,String dirName);
     CommonResp deleteUserFile(User user,String userFileId);
@@ -24,4 +25,9 @@ public interface UserFileService {
     CommonResp moveUserFile(MoveFileReq moveFileReq);
     CommonResp<List<UserFile>> listDeletedUserFiles(User user);
     CommonResp recoverUserFile(User user,String userFileId);
+
+    CommonResp listSearchUserFileByPage(User user, String fileName, Integer pageNo, Integer pageSize);
+
+    CommonResp truelyDeleteUserFile(User user, String userFileId);
+
 }
