@@ -31,16 +31,19 @@ public class ShareController {
             return shareResp;
         }
         SharedFile sharedFile=(SharedFile) shareResp.getData();
+
         CommonResp userResp=userService.findUser(saveFileReq.getUsername());
         if(userResp.getData()==null){
             return userResp;
         }
         User user=(User) userResp.getData();
+
         CommonResp userFileResp=userFileService.findUserFile(sharedFile.getUserFileId());
         if(userFileResp.getData()==null){
             return userResp;
         }
         UserFile userFile=(UserFile)userFileResp.getData();
+
         shareService.updateSharedCount(sharedFile.getSharedId());
         shareService.cleanExpireShare();
         return userFileService.addFileToUser(userFile,user, saveFileReq.getDirId());
