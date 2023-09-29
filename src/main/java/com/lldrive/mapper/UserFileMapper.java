@@ -39,7 +39,7 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Delete("delete from user_files where repo_id=#{repoId} and dir_id=#{dirId} and is_deleted=1")
     int deleteUserFilesInRecycle(@Param("repoId")String repoId,@Param("dirId")String dirId);
 
-    @Select("select * from user_files where dir_id=#{dirId} and is_dir=1 and is_deleted=0")
+    @Select("select * from user_files where dir_id=#{dirId} and is_dir=1")
     List<UserFile> selectDirsByDirId(@Param("dirId")String dirId);
 
     @Select("select * from user_files where repo_id=#{repoId} and is_deleted=0 and (file_name like concat('%',#{fileName},'%')) order by id ASC limit #{pageSize} offset #{offset}")

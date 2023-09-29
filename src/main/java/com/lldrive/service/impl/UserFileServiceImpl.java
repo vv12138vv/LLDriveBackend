@@ -95,9 +95,8 @@ public class UserFileServiceImpl implements UserFileService {
         Integer pageTotal=count/pageSize+1;
         Integer offset=(pageNo-1)*pageSize;
         List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndDirIdPage(user.getRepoId(),dirId,pageSize,offset);
-        Integer totalCount=userFiles.size();
         Map<String, Object> result=new HashMap<>();
-        result.put("total_count",totalCount);
+        result.put("total_count",count);
         result.put("page_size",pageSize);
         result.put("page_no",pageNo);
         result.put("page_total",pageTotal);
@@ -109,9 +108,8 @@ public class UserFileServiceImpl implements UserFileService {
         Integer pageTotal=count/pageSize+1;
         Integer offset=(pageNo-1)*pageSize;
         List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndFilename(user.getRepoId(),fileName,pageSize,offset);
-        Integer totalCount=userFiles.size();
         Map<String, Object> result=new HashMap<>();
-        result.put("total_count",totalCount);
+        result.put("total_count",count);
         result.put("page_size",pageSize);
         result.put("page_no",pageNo);
         result.put("page_total",pageTotal);
@@ -125,9 +123,8 @@ public class UserFileServiceImpl implements UserFileService {
         Integer pageTotal=(count/pageSize)+1;
         Integer offset=(pageNo-1)*pageSize;
         List<UserFile> deletedFiles=userFileMapper.selectDeletedFiles(user.getRepoId(),pageSize,offset);
-        Integer totalCount=deletedFiles.size();
         Map<String, Object> result=new HashMap<>();
-        result.put("total_count",totalCount);
+        result.put("total_count",count);
         result.put("page_size",pageSize);
         result.put("page_no",pageNo);
         result.put("page_total",pageTotal);
@@ -148,6 +145,7 @@ public class UserFileServiceImpl implements UserFileService {
         newDir.setDirId(dirId);
         newDir.setFileName(dirName);
         newDir.setRepoId(user.getRepoId());
+        newDir.setSize(Long.valueOf(0));
         newDir.setType(FileExtensionUtil.getMappingValue("folder"));
         int res=userFileMapper.insert(newDir);
         if(res==1){
