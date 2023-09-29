@@ -92,6 +92,8 @@ public class FileController {
         UserFile userFile=(UserFile) resp.getData();
         Map<String,Object> res=new HashMap<>();
         res.put("user_file_id",userFile.getUserFileId());
+        res.put("size",userFile.getSize());
+        res.put("create_time",userFile.getCreateTime());
         return new CommonResp(Status.SUCCESS,res);
     }
 

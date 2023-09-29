@@ -148,6 +148,7 @@ public class UserFileServiceImpl implements UserFileService {
         newDir.setDirId(dirId);
         newDir.setFileName(dirName);
         newDir.setRepoId(user.getRepoId());
+        newDir.setSize(Long.valueOf(0));
         newDir.setType(FileExtensionUtil.getMappingValue("folder"));
         int res=userFileMapper.insert(newDir);
         if(res==1){
