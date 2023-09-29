@@ -163,12 +163,6 @@ public class UserServiceImpl implements UserService {
         return new CommonResp(Status.SUCCESS,user);
     }
 
-    @Override
-    public CommonResp getUsersInfo(Integer current,Integer size) {
-        Page<User> page=new Page<>(current,size);
-        IPage iPage=userMapper.selectPage(page,null);
-        return new CommonResp(Status.SUCCESS,iPage);
-    }
 
     @Override
     public CommonResp changePassword(ChangePasswordReq changePasswordReq) {

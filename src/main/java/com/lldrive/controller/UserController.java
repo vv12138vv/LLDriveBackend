@@ -63,10 +63,6 @@ public class UserController {
         return userService.logout(token);
     }
 
-    @GetMapping("/list")
-    public CommonResp listAllUser(@RequestParam("current")Integer current,@RequestParam("size")Integer size){
-        return userService.getUsersInfo(current,size);
-    }
 
     @PostMapping("/reset-password")
     public CommonResp resetPassword(@Validated @RequestBody ResetPasswordReq resetPasswordReq){
