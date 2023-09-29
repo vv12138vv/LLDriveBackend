@@ -86,10 +86,7 @@ public class FileController {
         }
         User user=(User)userResp.getData();
         CommonResp resp=userFileService.createDir(user, mkDirReq.getDirId(), mkDirReq.getDirName());
-        if(resp.getData()==null){
-            return resp;
-        }
-        return new CommonResp(Status.SUCCESS);
+        return resp;
     }
 
     @GetMapping("/delete")
