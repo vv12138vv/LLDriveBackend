@@ -86,7 +86,13 @@ public class FileController {
         }
         User user=(User)userResp.getData();
         CommonResp resp=userFileService.createDir(user, mkDirReq.getDirId(), mkDirReq.getDirName());
-        return resp;
+        if(resp.getData()==null){
+            return resp;
+        }
+        UserFile userFile=(UserFile) resp.getData();
+        Map<String,Object> res=new HashMap<>();
+        res.put("user_file_id",userFile.getUserFileId());
+        return new CommonResp(Status.SUCCESS,res);
     }
 
     @GetMapping("/delete")
@@ -165,6 +171,5 @@ public class FileController {
         res.put("file_name",userFile.getFileName());
         return new CommonResp(Status.SUCCESS,res);
     }
-
 
 }
