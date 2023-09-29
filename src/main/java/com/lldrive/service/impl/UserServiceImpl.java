@@ -1,5 +1,6 @@
 package com.lldrive.service.impl;
 
+import cn.hutool.system.UserInfo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lldrive.Utils.UUIDUtil;
@@ -19,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import com.lldrive.domain.consts.Email;
 
@@ -183,12 +181,18 @@ public class UserServiceImpl implements UserService {
         Integer pageTotal=count/pageSize+1;
         Integer offset=(pageNo-1)*pageSize;
         List<User> users=userMapper.selectUsersByPage(pageSize,offset);
+        List<UserInfoResp> userInfos=new LinkedList<>();
+        for(User user:users){
+            Repo repo=repoMapper.selectRepoByRepoId(user.getRepoId());
+            UserInfoResp userInfo=new UserInfoResp(user,repo);
+            userInfos.add(userInfo);
+        }
         Map<String, Object> result=new HashMap<>();
         result.put("total_count",count);
         result.put("page_size",pageSize);
         result.put("page_no",pageNo);
         result.put("page_total",pageTotal);
-        result.put("list",users);
+        result.put("list",userInfos);
         return new CommonResp<>(Status.SUCCESS,result);
     }
 
