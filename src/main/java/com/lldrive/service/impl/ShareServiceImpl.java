@@ -59,7 +59,7 @@ public class ShareServiceImpl implements ShareService {
         sharedFile.setType(userFile.getType());
         int res=shareMapper.insert(sharedFile);
         if(res==1){
-            return new CommonResp(Status.SUCCESS);
+            return new CommonResp(Status.SUCCESS,sharedFile);
         }
         return new CommonResp(Status.SYSTEM_ERROR);
     }

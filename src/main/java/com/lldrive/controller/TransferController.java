@@ -22,6 +22,7 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -70,8 +71,10 @@ public class TransferController {
         File file=(File)fileResp.getData();
         try{
             FileInputStream in=new FileInputStream(file.getPath());
-            resp.setHeader("Content-Disposition","attachment;filename="+userFile.getFileName());
+//            resp.setHeader("Content-Disposition","attachment;filename="+userFile.getFileName());
+            resp.setHeader("Content-Disposition","attachment;filename="+URLEncoder.encode(userFile.getFileName(),"UTF-8"));
             resp.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            resp.setHeader("Content-Type", "application/octet-stream");
             BufferedOutputStream out=new BufferedOutputStream(resp.getOutputStream());
             byte []b=new byte[1024];
             int len;

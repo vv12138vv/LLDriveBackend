@@ -7,6 +7,7 @@ import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.SavaFileReq;
 import com.lldrive.domain.req.ShareFileReq;
 import com.lldrive.domain.resp.CommonResp;
+import com.lldrive.domain.types.Status;
 import com.lldrive.service.FileService;
 import com.lldrive.service.ShareService;
 import com.lldrive.service.UserFileService;
@@ -31,7 +32,9 @@ public class ShareController {
             return shareResp;
         }
         SharedFile sharedFile=(SharedFile) shareResp.getData();
-
+        if(!sharedFile.getCode().equals(saveFileReq.getCode())){
+            return new CommonResp(Status.INCORRECT_CODE);
+        }
         CommonResp userResp=userService.findUser(saveFileReq.getUsername());
         if(userResp.getData()==null){
             return userResp;
@@ -46,7 +49,7 @@ public class ShareController {
 
         shareService.updateSharedCount(sharedFile.getSharedId());
         shareService.cleanExpireShare();
-        return userFileService.addFileToUser(userFile,user, saveFileReq.getDirId());
+        return userFileService.addFileToUser(userFile,user,saveFileReq.getDirId());
     }
     @PostMapping("")
     CommonResp shareFile(@Validated @RequestBody ShareFileReq shareFileReq){

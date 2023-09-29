@@ -11,4 +11,6 @@ public class SavaFileReq {
     private String username;
     @JsonProperty("dir_id")
     private String dirId;
+    @JsonProperty("code")
+    private String code;
 }
