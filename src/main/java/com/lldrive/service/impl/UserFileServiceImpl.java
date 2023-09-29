@@ -116,6 +116,21 @@ public class UserFileServiceImpl implements UserFileService {
         result.put("list",userFiles);
         return new CommonResp<>(Status.SUCCESS,result);
     }
+    @Override
+    public CommonResp listUserFilesByType(User user, Integer type, Integer pageNo, Integer pageSize){
+        Integer count= userFileMapper.countUserFileByType(user.getRepoId(),type);
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> userFiles=userFileMapper.selectUserFilesByRepoIdAndType(user.getRepoId(),type,pageSize,offset);
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",count);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",userFiles);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
 
     @Override
     public CommonResp listRecycleByPage(User user,Integer pageNo,Integer pageSize){
