@@ -86,4 +86,11 @@ public class UserController {
         }
         return new CommonResp(Status.SUCCESS);
     }
+
+    @GetMapping("/list")
+    public CommonResp userAllList(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize){
+        Integer pageNo=Integer.parseInt(reqPageNo);
+        Integer pageSize=Integer.parseInt(reqPageSize);
+        return userService.listAllUser(pageNo,pageSize);
+    }
 }

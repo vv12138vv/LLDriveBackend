@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.Repo;
 import com.lldrive.domain.entity.User;
+import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.*;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.resp.UserInfoResp;
@@ -19,6 +20,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -175,4 +177,19 @@ public class UserServiceImpl implements UserService {
         }
         return new CommonResp(Status.SUCCESS,user);
     }
+    @Override
+    public CommonResp listAllUser(Integer pageNo,Integer pageSize){
+        Integer count= userMapper.countUser();
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<User> users=userMapper.selectUsersByPage(pageSize,offset);
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",count);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",users);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
 }

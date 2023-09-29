@@ -20,4 +20,6 @@ public interface UserService {
     CommonResp findUser(String username);
 
     CommonResp changePassword(ChangePasswordReq changePasswordReq);
+
+    CommonResp listAllUser(Integer pageNo,Integer pageSize);
 }
