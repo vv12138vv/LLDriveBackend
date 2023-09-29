@@ -78,9 +78,8 @@ public class ShareServiceImpl implements ShareService {
         Integer pageTotal=count/pageSize+1;
         Integer offset=(pageNo-1)*pageSize;
         List<SharedFile> sharedFiles=shareMapper.selectSharedFiles(pageSize,offset);
-        Integer totalCount=sharedFiles.size();
         Map<String, Object> result=new HashMap<>();
-        result.put("total_count",totalCount);
+        result.put("total_count",count);
         result.put("page_size",pageSize);
         result.put("page_no",pageNo);
         result.put("page_total",pageTotal);
