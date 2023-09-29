@@ -2,6 +2,7 @@ package com.lldrive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lldrive.domain.entity.User;
+import com.lldrive.domain.entity.UserFile;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -18,4 +19,9 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Update("update users set password=#{password} where email=#{email}")
     int updatePassword(@Param("email")String email,@Param("password")String password);
+    @Select("select COUNT(*) from users where is_admin=0")
+    Integer countUser();
+
+    @Select("select * from users where is_admin=0 order by id ASC limit #{pageSize} offset #{offset}")
+    List<User> selectUsersByPage(@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
 }

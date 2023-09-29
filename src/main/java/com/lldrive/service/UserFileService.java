@@ -30,4 +30,5 @@ public interface UserFileService {
 
     CommonResp truelyDeleteUserFile(User user, String userFileId);
 
+    CommonResp listUserFilesByType(User user, Integer type, Integer pageNo, Integer pageSize);
 }

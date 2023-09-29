@@ -30,8 +30,10 @@ public class User {
     @TableField(value = "is_admin")
     private Boolean isAdmin;
     @TableField(value = "create_time",fill= FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
     private Timestamp createTime;
     @TableField(value = "update_time",fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
     private Timestamp updateTime;
     @TableField(value = "delete_time")
     private Timestamp deleteTime;

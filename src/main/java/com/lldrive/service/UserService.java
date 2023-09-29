@@ -18,6 +18,8 @@ public interface UserService {
     CommonResp resetPassword(ResetPasswordReq resetPasswordReq);
     CommonResp setNewPasword(SetNewPasswordReq setNewPasswordReq);
     CommonResp findUser(String username);
-    CommonResp getUsersInfo(Integer curreent,Integer size);
+
     CommonResp changePassword(ChangePasswordReq changePasswordReq);
+
+    CommonResp listAllUser(Integer pageNo,Integer pageSize);
 }

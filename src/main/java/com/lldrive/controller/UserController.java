@@ -63,10 +63,6 @@ public class UserController {
         return userService.logout(token);
     }
 
-    @GetMapping("/list")
-    public CommonResp listAllUser(@RequestParam("current")Integer current,@RequestParam("size")Integer size){
-        return userService.getUsersInfo(current,size);
-    }
 
     @PostMapping("/reset-password")
     public CommonResp resetPassword(@Validated @RequestBody ResetPasswordReq resetPasswordReq){
@@ -89,5 +85,12 @@ public class UserController {
             return userResp;
         }
         return new CommonResp(Status.SUCCESS);
+    }
+
+    @GetMapping("/list")
+    public CommonResp userAllList(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize){
+        Integer pageNo=Integer.parseInt(reqPageNo);
+        Integer pageSize=Integer.parseInt(reqPageSize);
+        return userService.listAllUser(pageNo,pageSize);
     }
 }
