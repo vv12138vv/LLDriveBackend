@@ -10,6 +10,8 @@ import java.sql.Timestamp;
 
 @Data
 public class UserInfoResp {
+    @JsonProperty("user_id")
+    private String userId;
     private String username;
     private String email;
     @JsonProperty("is_banned")
@@ -25,6 +27,7 @@ public class UserInfoResp {
     private Timestamp createTime;
 
     public UserInfoResp(User user, Repo repo){
+        this.userId=user.getUserId();
         this.username=user.getUsername();
         this.email=user.getEmail();
         this.isBanned =user.getIsBanned();

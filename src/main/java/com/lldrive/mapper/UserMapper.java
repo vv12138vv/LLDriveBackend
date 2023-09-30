@@ -24,4 +24,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("select * from users where is_admin=0 order by id ASC limit #{pageSize} offset #{offset}")
     List<User> selectUsersByPage(@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
+
+    @Update("update users set is_banned=#{isBanned} where user_id=#{userId}")
+    Integer updateUserBanned(@Param("userId")String userId,@Param("isBanned")Boolean isBanned);
 }

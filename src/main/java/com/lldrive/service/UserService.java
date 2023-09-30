@@ -22,4 +22,6 @@ public interface UserService {
     CommonResp changePassword(ChangePasswordReq changePasswordReq);
 
     CommonResp listAllUser(Integer pageNo,Integer pageSize);
+
+    CommonResp changeUserStatus(String userId, Boolean isBanned);
 }

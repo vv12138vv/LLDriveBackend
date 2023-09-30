@@ -16,6 +16,7 @@ import com.lldrive.mapper.UserMapper;
 import com.lldrive.service.EmailService;
 import com.lldrive.service.TokenService;
 import com.lldrive.service.UserService;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -195,5 +196,16 @@ public class UserServiceImpl implements UserService {
         result.put("list",userInfos);
         return new CommonResp<>(Status.SUCCESS,result);
     }
+    @Override
+    public CommonResp changeUserStatus(String userId, Boolean isBanned){
+        int res=userMapper.updateUserBanned(userId,isBanned);
+        if(res==1){
+            return new CommonResp(Status.SUCCESS);
+        }
+        else {
+            return new CommonResp(Status.SYSTEM_ERROR);
+        }
+    }
+
 
 }

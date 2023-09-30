@@ -93,4 +93,11 @@ public class UserController {
         Integer pageSize=Integer.parseInt(reqPageSize);
         return userService.listAllUser(pageNo,pageSize);
     }
+
+    @GetMapping("/change-status")
+    public CommonResp banUser(@RequestParam("user_id")String userId,@RequestParam("is_banned")String reqIsBanned){
+        Integer banned=Integer.parseInt(reqIsBanned);
+        Boolean isBanned= banned == 1;
+        return userService.changeUserStatus(userId,isBanned);
+    }
 }
