@@ -27,6 +27,12 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     @Select("select * from user_files where user_file_id=#{userFileId}")
     UserFile selectUserFileByUserFileId(@Param("userFileId")String userFileId);
 
+    @Select("select COUNT(*) from user_files where is_dir=0 and is_deleted=0")
+    Integer countAllUserFiles();
+
+    @Select("select * from user_files where is_deleted=0 and is_dir=0 order by id ASC limit #{pageSize} offset #{offset}")
+    List<UserFile> selectAllUserFiles(@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
+
     @Select("select * from user_files where dir_id=#{dirId} and is_deleted=0")
     List<UserFile> selectUserFilesByDirId(@Param("dirId")String dirId);
 
@@ -46,6 +52,13 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     List<UserFile> selectUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName,@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
     @Select("select COUNT(*) from user_files where repo_id=#{repoId} and is_deleted=0 and (file_name like concat('%',#{fileName},'%'))")
     Integer countUserFilesByRepoIdAndFilename(@Param("repoId")String repoId,@Param("fileName")String fileName);
+
+    @Select("select COUNT(*) from user_files where is_deleted=0 and is_dir=0 and (file_name like concat('%',#{fileName},'%'))")
+    Integer countUserFilesByFilename(@Param("fileName")String fileName);
+
+    @Select("select * from user_files where is_deleted=0 and is_dir=0 and (file_name like concat('%',#{fileName},'%')) order by id ASC limit #{pageSize} offset #{offset}")
+    List<UserFile> selectAllUserFilesByFilename(@Param("fileName")String fileName,@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
+
     @Select("select * from user_files where repo_id=#{repoId} and is_deleted=0 and type=#{type} order by id ASC limit #{pageSize} offset #{offset}")
     List<UserFile> selectUserFilesByRepoIdAndType(@Param("repoId")String repoId, @Param("type")Integer type, @Param("pageSize")Integer pageSize, @Param("offset")Integer offset);
     @Select("select COUNT(*) from user_files where repo_id=#{repoId} and is_deleted=0 and type=#{type}")

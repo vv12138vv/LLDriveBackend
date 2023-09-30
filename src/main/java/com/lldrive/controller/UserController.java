@@ -88,9 +88,25 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public CommonResp userAllList(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize){
+    public CommonResp userAllList(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize,@RequestParam("username")String username){
         Integer pageNo=Integer.parseInt(reqPageNo);
         Integer pageSize=Integer.parseInt(reqPageSize);
-        return userService.listAllUser(pageNo,pageSize);
+        if(username==null||username.equals("")){
+            return userService.listAllUser(pageNo,pageSize);
+        }else{
+            return userService.listSearchAllUser(pageNo,pageSize,username);
+        }
+    }
+
+    @GetMapping("/change-status")
+    public CommonResp banUser(@RequestParam("user_id")String userId,@RequestParam("is_banned")String reqIsBanned){
+        Integer banned=Integer.parseInt(reqIsBanned);
+        Boolean isBanned= banned == 1;
+        return userService.changeUserStatus(userId,isBanned);
+    }
+    @GetMapping("/change-capacity")
+    public CommonResp changeCapacity(@RequestParam("user_id")String userId,@RequestParam("new_capacity")String reqNewCapacity){
+        Long newCapacity=Long.parseLong(reqNewCapacity)*1024*1024;
+        return userService.changeCapacity(userId,newCapacity);
     }
 }

@@ -13,4 +13,7 @@ public interface RepoMapper extends BaseMapper<Repo> {
     Repo selectRepoByRepoId(@Param("repoId")String repoId);
     @Update("update repos set cur_capacity=cur_capacity+#{fileSize} where repo_id=#{repoId}")
     int updateCurCapacity(@Param("repoId")String repoId,@Param("fileSize")Long fileSize);
+
+    @Update("update repos set max_capacity=#{maxCapacity} where repo_id=#{repoId}")
+    int updateMaxCapacity(@Param("repoId")String repoId,@Param("maxCapacity")Long maxCapacity);
 }

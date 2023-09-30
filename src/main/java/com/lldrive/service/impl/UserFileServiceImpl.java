@@ -9,6 +9,7 @@ import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.MoveFileReq;
 import com.lldrive.domain.req.UploadFileReq;
 import com.lldrive.domain.resp.CommonResp;
+import com.lldrive.domain.resp.UserFileResp;
 import com.lldrive.domain.types.Status;
 import com.lldrive.mapper.ChunkMapper;
 import com.lldrive.mapper.RepoMapper;
@@ -103,6 +104,49 @@ public class UserFileServiceImpl implements UserFileService {
         result.put("list",userFiles);
         return new CommonResp<>(Status.SUCCESS,result);
     }
+    @Override
+    public CommonResp listAllUserFiles(Integer pageNo,Integer pageSize){
+        Integer count= userFileMapper.countAllUserFiles();
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> userFiles=userFileMapper.selectAllUserFiles(pageSize,offset);
+        List<UserFileResp> userFileResps=new LinkedList<>();
+        for(UserFile userFile:userFiles){
+            Repo repo=repoMapper.selectRepoByRepoId(userFile.getRepoId());
+            User user=userMapper.selectByRepoId(repo.getRepoId());
+            UserFileResp userFileResp=new UserFileResp(user,userFile);
+            userFileResps.add(userFileResp);
+        }
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",count);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",userFileResps);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
+    public CommonResp listAllSearchUserFile(String fileName, Integer pageNo, Integer pageSize){
+        Integer count= userFileMapper.countUserFilesByFilename(fileName);
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<UserFile> userFiles=userFileMapper.selectAllUserFilesByFilename(fileName,pageSize,offset);
+        List<UserFileResp> userFileResps=new LinkedList<>();
+        for(UserFile userFile:userFiles){
+            Repo repo=repoMapper.selectRepoByRepoId(userFile.getRepoId());
+            User user=userMapper.selectByRepoId(repo.getRepoId());
+            UserFileResp userFileResp=new UserFileResp(user,userFile);
+            userFileResps.add(userFileResp);
+        }
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",count);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",userFileResps);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
     public CommonResp listSearchUserFileByPage(User user, String fileName, Integer pageNo, Integer pageSize){
         Integer count= userFileMapper.countUserFilesByRepoIdAndFilename(user.getRepoId(),fileName);
         Integer pageTotal=count/pageSize+1;
@@ -204,6 +248,22 @@ public class UserFileServiceImpl implements UserFileService {
         repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
         return new CommonResp(Status.SUCCESS);
     }
+    @Override
+    public CommonResp adminDeleteUserFile(String userFileId){
+        UserFile userFile=userFileMapper.selectUserFileByUserFileId(userFileId);
+        if(userFile==null){
+            return new CommonResp(Status.FILE_NOT_EXIST);
+        }
+        Repo repo=repoMapper.selectRepoByRepoId(userFile.getRepoId());
+        User user=userMapper.selectByRepoId(repo.getRepoId());
+        int res=userFileMapper.updateUserFileDeleted(userFileId,true);
+        if(res==1){
+            repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
+            return new CommonResp(Status.SUCCESS);
+        }
+        return new CommonResp(Status.SYSTEM_ERROR);
+    }
+
 
     @Override
     public CommonResp truelyDeleteUserFile(User user, String userFileId){
