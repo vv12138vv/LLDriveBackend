@@ -30,31 +30,6 @@ public class FileController {
     UserService userService;
 
 
-    @GetMapping("/list")
-    CommonResp fileList(@RequestParam("username")String username,@RequestParam("dir_id")String dirId,@RequestParam("type")String type){
-        CommonResp userResp=userService.findUser(username);
-        if(userResp.getData()==null){
-            return userResp;
-        }
-        User user=(User) userResp.getData();
-        CommonResp<List<UserFile>> resp=userFileService.listUserFiles(user,dirId);
-        List<UserFile> userFiles=resp.getData();
-        if (type==null||type.equals("")){//若无类型要求，则返回所有类型文件
-            return resp;
-        }
-        for(UserFile userFile:userFiles){
-            if(type.equals("folder")){//如类型为文件夹
-                if(!userFile.getIsDir()){
-                    userFiles.remove(userFile);
-                }
-            }else{
-                if(!userFile.getType().equals(type)){
-                    userFiles.remove(userFile);
-                }
-            }
-        }
-        return resp;
-    }
 
     @PostMapping("/list")
     CommonResp listUserFiles(@Validated @RequestBody UserFileListReq userFileListReq){
@@ -111,16 +86,6 @@ public class FileController {
         return userFileService.deleteUserFile(user,userFileId);
     }
 
-//    @GetMapping("/search")
-//    CommonResp searchFile(@RequestParam("username")String username,@RequestParam("file_name")String fileName){//支持模糊搜索
-//        CommonResp userResp=userService.findUser(username);
-//        if(userResp.getData()==null){
-//            return userResp;
-//        }
-//        User user=(User)userResp.getData();
-//        CommonResp<List<UserFile>> searchResult=userFileService.searchUserFiles(user,fileName);
-//        return searchResult;
-//    }
 
     @GetMapping("/rename")
     CommonResp renameFile(@RequestParam("user_file_id")String userFileId,@RequestParam("new_name")String newName){
@@ -176,6 +141,22 @@ public class FileController {
         Map<String,Object> res=new HashMap<>();
         res.put("file_name",userFile.getFileName());
         return new CommonResp(Status.SUCCESS,res);
+    }
+
+    @PostMapping("/admin-list")
+    CommonResp listListUserFiles(@Validated @RequestBody UserFileListReq userFileListReq){
+        Integer pageNo=Integer.parseInt(userFileListReq.getPageNo());
+        Integer pageSize=Integer.parseInt(userFileListReq.getPageSize());
+        if(userFileListReq.getFileName()==null||userFileListReq.equals("")){
+            return userFileService.listAllUserFiles(pageNo,pageSize);
+        }else{
+            return userFileService.listAllSearchUserFile(userFileListReq.getFileName(),pageNo,pageSize);
+        }
+    }
+
+    @GetMapping("/admin-delete")
+    CommonResp adminDeleteFile(@RequestParam("user_file_id")String userFileId){
+        return userFileService.adminDeleteUserFile(userFileId);
     }
 
 }
