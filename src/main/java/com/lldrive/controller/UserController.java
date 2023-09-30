@@ -100,4 +100,9 @@ public class UserController {
         Boolean isBanned= banned == 1;
         return userService.changeUserStatus(userId,isBanned);
     }
+    @GetMapping("/change-capacity")
+    public CommonResp changeCapacity(@RequestParam("user_id")String userId,@RequestParam("new_capacity")String reqNewCapacity){
+        Long newCapacity=Long.parseLong(reqNewCapacity)*1024*1024;
+        return userService.changeCapacity(userId,newCapacity);
+    }
 }

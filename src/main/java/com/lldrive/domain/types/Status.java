@@ -22,6 +22,7 @@ public enum Status{
     HASH_ERROR(4014,"Hash Code error"),
     SHARE_NOT_EXIST(4015,"The share does not exist"),
     CHUNK_SUCCESS(4016,"The chunk upload success"),
+    CAPACITY_ERROR(4017,"The capacity too small"),
     SUCCESS(5000,"SUCCESS");
 
     private Integer statusCode;

@@ -17,6 +17,9 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("select * from users where email=#{email}")
     User selectByEmail(@Param("email")String email);
 
+    @Select("select * from users where user_id=#{userId}")
+    User selectByUserId(@Param("userId")String userId);
+
     @Update("update users set password=#{password} where email=#{email}")
     int updatePassword(@Param("email")String email,@Param("password")String password);
     @Select("select COUNT(*) from users where is_admin=0")

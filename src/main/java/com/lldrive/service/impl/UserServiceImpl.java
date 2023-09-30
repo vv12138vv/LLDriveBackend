@@ -206,6 +206,20 @@ public class UserServiceImpl implements UserService {
             return new CommonResp(Status.SYSTEM_ERROR);
         }
     }
+    @Override
+    public CommonResp changeCapacity(String userId, Long newCapacity){
+        User user=userMapper.selectByUserId(userId);
+        Repo repo=repoMapper.selectRepoByRepoId(user.getRepoId());
+        UserInfoResp userInfoResp=new UserInfoResp(user,repo);
+        if(newCapacity<userInfoResp.getCurCapacity()){
+            return new CommonResp(Status.CAPACITY_ERROR);
+        }
+        int res=repoMapper.updateMaxCapacity(repo.getRepoId(), newCapacity);
+        if(res==1){
+            return new CommonResp(Status.SUCCESS);
+        }
+        return new CommonResp(Status.SYSTEM_ERROR);
+    }
 
 
 }
