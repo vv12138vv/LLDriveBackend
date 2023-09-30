@@ -88,10 +88,14 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public CommonResp userAllList(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize){
+    public CommonResp userAllList(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize,@RequestParam("username")String username){
         Integer pageNo=Integer.parseInt(reqPageNo);
         Integer pageSize=Integer.parseInt(reqPageSize);
-        return userService.listAllUser(pageNo,pageSize);
+        if(username==null||username.equals("")){
+            return userService.listAllUser(pageNo,pageSize);
+        }else{
+            return userService.listSearchAllUser(pageNo,pageSize,username);
+        }
     }
 
     @GetMapping("/change-status")

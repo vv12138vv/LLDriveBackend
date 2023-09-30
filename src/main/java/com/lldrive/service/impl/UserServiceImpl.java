@@ -9,6 +9,7 @@ import com.lldrive.domain.entity.User;
 import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.*;
 import com.lldrive.domain.resp.CommonResp;
+import com.lldrive.domain.resp.UserFileResp;
 import com.lldrive.domain.resp.UserInfoResp;
 import com.lldrive.domain.types.Status;
 import com.lldrive.mapper.RepoMapper;
@@ -220,6 +221,27 @@ public class UserServiceImpl implements UserService {
         }
         return new CommonResp(Status.SYSTEM_ERROR);
     }
+    @Override
+    public CommonResp listSearchAllUser(Integer pageNo,Integer pageSize,String username){
+        Integer count= userMapper.countUserByusername(username);
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<User> users=userMapper.selectAllUsersByUsername(username,pageSize,offset);
+        List<UserInfoResp> userInfos=new LinkedList<>();
+        for(User user:users){
+            Repo repo=repoMapper.selectRepoByRepoId(user.getRepoId());
+            UserInfoResp userInfo=new UserInfoResp(user,repo);
+            userInfos.add(userInfo);
+        }
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",count);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",userInfos);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
 
 
 }

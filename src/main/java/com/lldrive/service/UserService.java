@@ -26,4 +26,6 @@ public interface UserService {
     CommonResp changeUserStatus(String userId, Boolean isBanned);
 
     CommonResp changeCapacity(String userId, Long newCapacity);
+
+    CommonResp listSearchAllUser(Integer pageNo,Integer pageSize,String username);
 }
