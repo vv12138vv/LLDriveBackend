@@ -299,7 +299,7 @@ public class UserFileServiceImpl implements UserFileService {
         }
 //        userFileMapper.updateUserFileDeleted(userFileId,true);
         userFileMapper.deleteById(userFile.getId());
-        this.updateDirSize(userFileId,false);
+//        this.updateDirSize(userFileId,false);
         return new CommonResp(Status.SUCCESS);
     }
 
