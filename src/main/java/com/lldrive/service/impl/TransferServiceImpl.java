@@ -46,7 +46,7 @@ public class TransferServiceImpl implements TransferService {
     UserFileMapper userFileMapper;
     @Autowired
     UserFileService userFileService;
-    @Value("C:\\Users\\jjjjssky\\Desktop\\LLDrive\\LLDrive\\src\\main\\resources\\file_storage")
+    @Value("C:\\file_storage")
     private String FILE_STORE_PATH;
 
     @Override

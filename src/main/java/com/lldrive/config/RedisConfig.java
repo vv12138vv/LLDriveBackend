@@ -12,7 +12,10 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnection;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -22,10 +25,8 @@ import java.util.TimeZone;
 
 @Configuration
 public class RedisConfig {
-    @Autowired
-    private RedisConnectionFactory factory;
     @Bean
-    public RedisTemplate redisTemplate(){
+    public RedisTemplate redisTemplate(LettuceConnectionFactory factory){
         RedisTemplate<String,Object> redisTemplate=new RedisTemplate<>();
         redisTemplate.setConnectionFactory(factory);//创建连接工厂
         //键序列化
