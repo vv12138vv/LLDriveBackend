@@ -1,12 +1,14 @@
 package com.lldrive.controller;
 
 import com.lldrive.domain.entity.File;
+import com.lldrive.domain.entity.SharedFile;
 import com.lldrive.domain.entity.User;
 import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.UploadFileReq;
 import com.lldrive.domain.resp.CommonResp;
 import com.lldrive.domain.types.Status;
 import com.lldrive.mapper.UserFileMapper;
+import com.lldrive.service.ShareService;
 import com.lldrive.service.TransferService;
 import com.lldrive.service.UserFileService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +38,8 @@ public class TransferController {
     RedisTemplate redisTemplate;
     @Autowired
     UserFileService userFileService;
+    @Autowired
+    ShareService shareService;
     @PostMapping("/upload")
     public CommonResp upload(UploadFileReq uploadFileReq) {
         CommonResp resp = transferService.upload(uploadFileReq);
@@ -60,6 +64,43 @@ public class TransferController {
     @GetMapping("/download")
     public CommonResp download(@RequestParam("user_file_id")String userFileId,HttpServletResponse resp){
         CommonResp userFileResp=userFileService.findUserFile(userFileId);
+        if(userFileResp.getData()==null){
+            return userFileResp;
+        }
+        UserFile userFile=(UserFile)userFileResp.getData();
+        CommonResp fileResp=transferService.findFile(userFile);
+        if(fileResp.getData()==null){
+            return fileResp;
+        }
+        File file=(File)fileResp.getData();
+        try{
+            FileInputStream in=new FileInputStream(file.getPath());
+//            resp.setHeader("Content-Disposition","attachment;filename="+userFile.getFileName());
+            resp.setHeader("Content-Disposition","attachment;filename="+URLEncoder.encode(userFile.getFileName(),"UTF-8"));
+            resp.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            resp.setHeader("Content-Type", "application/octet-stream");
+            BufferedOutputStream out=new BufferedOutputStream(resp.getOutputStream());
+            byte []b=new byte[1024];
+            int len;
+            while((len=in.read(b))!=-1){
+                out.write(b,0,len);
+            }
+            in.close();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            return new CommonResp(Status.SYSTEM_ERROR);
+        }
+        return new CommonResp(Status.SUCCESS);
+    }
+    @GetMapping("/downloadShared")
+    public CommonResp downloadShared(@RequestParam("shared_file_id")String sharedFileId,HttpServletResponse resp){
+        CommonResp sharedFileResp=shareService.findShareRecord(sharedFileId);
+        if(sharedFileResp.getData()==null){
+            return new CommonResp(Status.FILE_NOT_EXIST);
+        }
+        SharedFile sharedFile=(SharedFile)sharedFileResp.getData();
+        CommonResp userFileResp=userFileService.findUserFile(sharedFile.getUserFileId());
         if(userFileResp.getData()==null){
             return userFileResp;
         }

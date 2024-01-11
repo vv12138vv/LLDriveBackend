@@ -20,8 +20,15 @@ public interface ShareMapper extends BaseMapper<SharedFile> {
 
     @Select("select COUNT(*) from shared_files")
     Integer selectSharedCount();
+
+    @Select("select COUNT(*) from shared_files where valid_type=0")
+    Integer selectPublicSharedCount();
     @Select("select * from shared_files order by id asc limit #{pageSize} offset #{offset}")
     List<SharedFile> selectSharedFiles(@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
+    @Select("select * from shared_files where valid_type=0 order by id asc limit #{pageSize} offset #{offset}")
+    List<SharedFile> selectPublicSharedFiles(@Param("pageSize")Integer pageSize,@Param("offset")Integer offset);
+
+
     @Delete("delete from shared_files where expire_time<NOW()")
     Integer cleanExpireRecord();
 }

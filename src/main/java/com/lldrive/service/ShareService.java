@@ -13,4 +13,6 @@ public interface ShareService {
     CommonResp listShareRecord(Integer pageNo,Integer pageSize);
 
     CommonResp cleanExpireShare();
+
+    CommonResp listVisitorFiles(Integer pageNo,Integer pageSize);
 }

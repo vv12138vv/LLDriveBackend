@@ -32,8 +32,10 @@ public class ShareController {
             return shareResp;
         }
         SharedFile sharedFile=(SharedFile) shareResp.getData();
-        if(!sharedFile.getCode().equals(saveFileReq.getCode())){
-            return new CommonResp(Status.INCORRECT_CODE);
+        if(sharedFile.getValidType()!=0){
+            if(!sharedFile.getCode().equals(saveFileReq.getCode())){
+                return new CommonResp(Status.INCORRECT_CODE);
+            }
         }
         CommonResp userResp=userService.findUser(saveFileReq.getUsername());
         if(userResp.getData()==null){
@@ -46,7 +48,6 @@ public class ShareController {
             return userResp;
         }
         UserFile userFile=(UserFile)userFileResp.getData();
-
         shareService.updateSharedCount(sharedFile.getSharedId());
         shareService.cleanExpireShare();
         return userFileService.addFileToUser(userFile,user,saveFileReq.getDirId());
@@ -63,6 +64,14 @@ public class ShareController {
         Integer pageSize=Integer.parseInt(reqPageSize);
         shareService.cleanExpireShare();
         return shareService.listShareRecord(pageNo,pageSize);
+    }
+
+    @GetMapping("/visitors/list")
+    CommonResp listVisitorFiles(@RequestParam("page_no")String reqPageNo,@RequestParam("page_size")String reqPageSize){
+        Integer pageNo=Integer.parseInt(reqPageNo);
+        Integer pageSize=Integer.parseInt(reqPageSize);
+        shareService.cleanExpireShare();
+        return shareService.listVisitorFiles(pageNo,pageSize);
     }
 
     @GetMapping("/clean")

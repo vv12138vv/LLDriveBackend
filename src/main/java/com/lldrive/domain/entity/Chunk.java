@@ -20,4 +20,10 @@ public class Chunk {
     private Long currentChunkSize;//当前分片大小
     @TableField("is_upload")
     private Boolean isUpload;
+    @TableField("chunk_size")
+    private Integer chunkSize;
+    @TableField("total_chunk")
+    private Integer totalChunk;
+    @TableField("file_id")
+    private String fileId;
 }

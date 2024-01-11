@@ -15,4 +15,5 @@ public interface TransferService {
     CommonResp fastUpload(UploadFileReq uploadFileReq);
 
     CommonResp findFile(UserFile userFile);
+
 }

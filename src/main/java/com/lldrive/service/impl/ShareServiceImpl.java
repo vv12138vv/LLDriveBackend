@@ -1,11 +1,15 @@
 package com.lldrive.service.impl;
 
 import com.lldrive.Utils.UUIDUtil;
+import com.lldrive.domain.entity.Repo;
 import com.lldrive.domain.entity.SharedFile;
+import com.lldrive.domain.entity.User;
 import com.lldrive.domain.entity.UserFile;
 import com.lldrive.domain.req.ShareFileReq;
 import com.lldrive.domain.resp.CommonResp;
+import com.lldrive.domain.resp.SharedFileResp;
 import com.lldrive.domain.types.Status;
+import com.lldrive.mapper.RepoMapper;
 import com.lldrive.mapper.ShareMapper;
 import com.lldrive.mapper.UserFileMapper;
 import com.lldrive.mapper.UserMapper;
@@ -19,6 +23,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +38,8 @@ public class ShareServiceImpl implements ShareService {
     UserFileMapper userFileMapper;
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    RepoMapper repoMapper;
     public CommonResp findShareRecord(String sharedId){
        SharedFile sharedFile= shareMapper.selectBySharedId(sharedId);
        if(sharedFile==null){
@@ -57,6 +64,7 @@ public class ShareServiceImpl implements ShareService {
         sharedFile.setExpireTime(Timestamp.valueOf(expireTime));
         sharedFile.setFileName(userFile.getFileName());
         sharedFile.setType(userFile.getType());
+        sharedFile.setValidType(shareFileReq.getValidType());
         int res=shareMapper.insert(sharedFile);
         if(res==1){
             return new CommonResp(Status.SUCCESS,sharedFile);
@@ -78,14 +86,43 @@ public class ShareServiceImpl implements ShareService {
         Integer pageTotal=count/pageSize+1;
         Integer offset=(pageNo-1)*pageSize;
         List<SharedFile> sharedFiles=shareMapper.selectSharedFiles(pageSize,offset);
+        List<SharedFileResp> sharedFileResps=new LinkedList<>();
+        for(SharedFile sharedFile:sharedFiles){
+            UserFile userFile=userFileMapper.selectUserFileByUserFileId(sharedFile.getUserFileId());
+            User user=userMapper.selectByRepoId(userFile.getRepoId());
+            SharedFileResp sharedFileResp=new SharedFileResp(sharedFile,user);
+            sharedFileResps.add(sharedFileResp);
+        }
         Map<String, Object> result=new HashMap<>();
         result.put("total_count",count);
         result.put("page_size",pageSize);
         result.put("page_no",pageNo);
         result.put("page_total",pageTotal);
-        result.put("list",sharedFiles);
+        result.put("list",sharedFileResps);
         return new CommonResp<>(Status.SUCCESS,result);
     }
+    @Override
+    public CommonResp listVisitorFiles(Integer pageNo,Integer pageSize){
+        Integer count=shareMapper.selectPublicSharedCount();
+        Integer pageTotal=count/pageSize+1;
+        Integer offset=(pageNo-1)*pageSize;
+        List<SharedFile> sharedFiles=shareMapper.selectPublicSharedFiles(pageSize,offset);
+        List<SharedFileResp> sharedFileResps=new LinkedList<>();
+        for(SharedFile sharedFile:sharedFiles){
+            UserFile userFile=userFileMapper.selectUserFileByUserFileId(sharedFile.getUserFileId());
+            User user=userMapper.selectByRepoId(userFile.getRepoId());
+            SharedFileResp sharedFileResp=new SharedFileResp(sharedFile,user);
+            sharedFileResps.add(sharedFileResp);
+        }
+        Map<String, Object> result=new HashMap<>();
+        result.put("total_count",count);
+        result.put("page_size",pageSize);
+        result.put("page_no",pageNo);
+        result.put("page_total",pageTotal);
+        result.put("list",sharedFileResps);
+        return new CommonResp<>(Status.SUCCESS,result);
+    }
+
 
     @Override
     public CommonResp cleanExpireShare(){
