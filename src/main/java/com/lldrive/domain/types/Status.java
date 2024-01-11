@@ -23,6 +23,8 @@ public enum Status{
     SHARE_NOT_EXIST(4015,"The share does not exist"),
     CHUNK_SUCCESS(4016,"The chunk upload success"),
     CAPACITY_ERROR(4017,"The capacity too small"),
+
+    PARAM_ERROR(4018,"The parameters error"),
     SUCCESS(5000,"SUCCESS");
 
     private Integer statusCode;

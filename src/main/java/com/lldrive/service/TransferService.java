@@ -15,4 +15,8 @@ public interface TransferService {
     CommonResp fastUpload(UploadFileReq uploadFileReq);
 
     CommonResp findFile(UserFile userFile);
+
+    CommonResp newChunkUpload(UploadFileReq uploadFileReq);
+    boolean singleUpload(UploadFileReq uploadFileReq,String fullFileName);
+    boolean uploadChunk(UploadFileReq uploadFileReq,String fullFileName);
 }

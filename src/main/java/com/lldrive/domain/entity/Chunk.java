@@ -1,5 +1,6 @@
 package com.lldrive.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -10,7 +11,7 @@ import java.sql.Timestamp;
 @Data
 @TableName("chunks")
 public class Chunk {
-    @TableId
+    @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
     @TableField("hash")
     private String hash;
@@ -18,6 +19,9 @@ public class Chunk {
     private Integer chunkNumber;
     @TableField("cur_chunk_size")
     private Long currentChunkSize;//当前分片大小
-    @TableField("is_upload")
-    private Boolean isUpload;
+    @TableField("chunk_size")
+    private Long chunkSize;
+    @TableField("total_chunk")
+    private Long totalChunk;
+
 }

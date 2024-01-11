@@ -1,5 +1,7 @@
 package com.lldrive.service.impl;
 
+import cn.hutool.db.StatementUtil;
+import com.alibaba.druid.support.spring.stat.annotation.Stat;
 import com.lldrive.Utils.FileUtil;
 import com.lldrive.Utils.UUIDUtil;
 import com.lldrive.domain.entity.Chunk;
@@ -31,8 +33,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 import static com.lldrive.domain.consts.Const.*;
 
@@ -46,20 +47,117 @@ public class TransferServiceImpl implements TransferService {
     UserFileMapper userFileMapper;
     @Autowired
     UserFileService userFileService;
-    @Value("C:\\Users\\jjjjssky\\Desktop\\LLDrive\\LLDrive\\src\\main\\resources\\file_storage")
+    @Value("C:\\file_storage")
     private String FILE_STORE_PATH;
+    private static final Long DEFAULT_CHUNK_SIZE= (long) (5 * 1024 * 1024);//20MB
+//    @Override
+//    public CommonResp upload(UploadFileReq uploadFileReq) {
+//        com.lldrive.domain.entity.File file = fileMapper.selectFileByHash(uploadFileReq.getHash());
+//        if (file != null) {
+//            return new CommonResp(Status.FILE_EXIST, file);
+//        }
+//        boolean chunkFlag = uploadFileReq.getChunkFlag();
+//        if (!chunkFlag) {
+//            return simpleUpload(uploadFileReq);
+//        }
+//        return chunkUpload(uploadFileReq);
+//    }
 
     @Override
-    public CommonResp upload(UploadFileReq uploadFileReq) {
-        com.lldrive.domain.entity.File file = fileMapper.selectFileByHash(uploadFileReq.getHash());
-        if (file != null) {
-            return new CommonResp(Status.FILE_EXIST, file);
+    public CommonResp upload(UploadFileReq uploadFileReq){
+        com.lldrive.domain.entity.File file=fileMapper.selectFileByHash(uploadFileReq.getHash());
+        if(file!=null){
+            //todo fast upload
         }
-        boolean chunkFlag = uploadFileReq.getChunkFlag();
-        if (!chunkFlag) {
-            return simpleUpload(uploadFileReq);
+        if(null==uploadFileReq.getFile()){
+            return new CommonResp(Status.PARAM_ERROR);
         }
-        return chunkUpload(uploadFileReq);
+        File savePath=new File(FILE_STORE_PATH);
+        if(!savePath.exists()){
+            boolean isCreated=savePath.mkdir();
+            if(!isCreated){
+                return new CommonResp(Status.SYSTEM_ERROR);
+            }
+        }
+        String extName=FileUtil.getFileExtension(uploadFileReq.getFileName());
+        String fullFileName=savePath+File.separator+uploadFileReq.getHash()+'.'+extName;
+        //单文件上传
+        if(uploadFileReq.getTotalChunks()==1){
+            boolean isUploaded=singleUpload(uploadFileReq,fullFileName);
+            if(!isUploaded){
+                return new CommonResp(Status.SYSTEM_ERROR);
+            }
+            com.lldrive.domain.entity.File fileRecord = new com.lldrive.domain.entity.File();//数据库添加信息
+            String randomId=UUIDUtil.generate(FILE_NAME_LENGTH);
+            String fileName=savePath+File.separator+randomId+'.'+extName;
+            fileRecord.setPath(fileName);
+            fileRecord.setType(extName);
+            fileRecord.setHash(uploadFileReq.getHash());
+            fileRecord.setFileId(randomId);
+            fileRecord.setSize(uploadFileReq.getFile().getSize());
+            int res = fileMapper.insert(fileRecord);
+            if(res!=1){
+                return new CommonResp(Status.SYSTEM_ERROR);
+            }
+            return new CommonResp(Status.SUCCESS,fileRecord);
+        }
+        uploadChunk(uploadFileReq,fullFileName);
+        Chunk chunk=new Chunk();
+        chunk.setChunkNumber(uploadFileReq.getChunkNumber());
+        chunk.setChunkSize(DEFAULT_CHUNK_SIZE);
+        chunk.setTotalChunk(Long.valueOf(uploadFileReq.getTotalChunks()));
+        chunk.setHash(uploadFileReq.getHash());
+        chunk.setCurrentChunkSize(uploadFileReq.getFile().getSize());
+        chunkMapper.insert(chunk);
+        Integer count=chunkMapper.chunkCount(uploadFileReq.getHash());
+        if(Objects.equals(count, uploadFileReq.getTotalChunks())){
+            com.lldrive.domain.entity.File fileRecord=new com.lldrive.domain.entity.File();
+            String randomId=UUIDUtil.generate(FILE_NAME_LENGTH);
+            String fileName=savePath+File.separator+randomId+'.'+extName;
+            File tempName=new File(fullFileName);
+            File newName=new File(fileName);
+            tempName.renameTo(newName);
+            fileRecord.setPath(fileName);
+            fileRecord.setType(extName);
+            fileRecord.setHash(uploadFileReq.getHash());
+            fileRecord.setFileId(randomId);
+            fileRecord.setSize(uploadFileReq.getFile().getSize());
+            fileMapper.insert(fileRecord);
+            chunkMapper.deleteByHash(uploadFileReq.getHash());
+            return new CommonResp(Status.SUCCESS,fileRecord);
+        }
+        Map<String,String> res=new HashMap<>();
+        res.put("status","uploading");
+        return new CommonResp(Status.CHUNK_SUCCESS,res);
+    }
+
+    @Override
+    public boolean singleUpload(UploadFileReq uploadFileReq,String fullFileName){
+        File saveFile=new File(fullFileName);
+        try{
+            uploadFileReq.getFile().transferTo(saveFile);
+        }catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+
+    public boolean uploadChunk(UploadFileReq uploadFileReq,String fullFileName){
+        try(RandomAccessFile randomAccessFile=new RandomAccessFile(fullFileName,"rw")){
+            Long chunkSize=DEFAULT_CHUNK_SIZE;
+            if(uploadFileReq.getChunkSize()!=null&&uploadFileReq.getChunkSize()!=0L){
+                chunkSize=uploadFileReq.getChunkSize();
+            }
+            Long offset=chunkSize*uploadFileReq.getChunkNumber();
+            randomAccessFile.seek(offset);
+            randomAccessFile.write(uploadFileReq.getFile().getBytes());
+        }catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -111,6 +209,11 @@ public class TransferServiceImpl implements TransferService {
             return new CommonResp(Status.FILE_NOT_EXIST);
         }
         return new CommonResp(Status.SUCCESS,file);
+    }
+
+    @Override
+    public CommonResp newChunkUpload(UploadFileReq uploadFileReq) {
+        return null;
     }
 
     public CommonResp chunkUpload(UploadFileReq uploadFileReq){
@@ -169,7 +272,6 @@ public class TransferServiceImpl implements TransferService {
         Chunk chunk=new Chunk();
         chunk.setChunkNumber(chunkNumber);
         chunk.setHash(fileHash);
-        chunk.setIsUpload(true);
         chunk.setCurrentChunkSize(file.getSize());
         int res=chunkMapper.insert(chunk);
         if(res==1){

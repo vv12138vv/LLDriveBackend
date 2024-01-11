@@ -16,6 +16,6 @@ public interface ChunkMapper extends BaseMapper<Chunk> {
     @Select("select COUNT(*) from chunks where hash=#{hash}")
     Integer chunkCount(@Param("hash")String hash);
 
-    @Delete("delete chunks where hash=#{hash}")
+    @Delete("delete from chunks where hash=#{hash}")
     int deleteByHash(@Param("hash")String hash);
 }
