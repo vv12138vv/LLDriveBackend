@@ -22,7 +22,7 @@ public class UploadFileReq {
     @NotNull
     private Integer totalChunks;//切片总数
     @NotNull
-    private Integer totalSize;//文件总大小
+    private Long totalSize;//文件总大小
     @NotBlank
     private String hash;//切片MD5值
     private MultipartFile file;//文件

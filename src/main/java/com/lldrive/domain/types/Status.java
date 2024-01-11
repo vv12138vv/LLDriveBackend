@@ -25,6 +25,7 @@ public enum Status{
     CAPACITY_ERROR(4017,"The capacity too small"),
 
     PARAM_ERROR(4018,"The parameters error"),
+    FAST_UPLOAD_SUCCESS(4019,"Fast Upload success"),
     SUCCESS(5000,"SUCCESS");
 
     private Integer statusCode;

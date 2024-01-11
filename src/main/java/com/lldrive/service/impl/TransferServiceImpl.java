@@ -67,7 +67,7 @@ public class TransferServiceImpl implements TransferService {
     public CommonResp upload(UploadFileReq uploadFileReq){
         com.lldrive.domain.entity.File file=fileMapper.selectFileByHash(uploadFileReq.getHash());
         if(file!=null){
-            //todo fast upload
+            return new CommonResp(Status.FAST_UPLOAD_SUCCESS,file);
         }
         if(null==uploadFileReq.getFile()){
             return new CommonResp(Status.PARAM_ERROR);
@@ -94,7 +94,7 @@ public class TransferServiceImpl implements TransferService {
             fileRecord.setType(extName);
             fileRecord.setHash(uploadFileReq.getHash());
             fileRecord.setFileId(randomId);
-            fileRecord.setSize(uploadFileReq.getFile().getSize());
+            fileRecord.setSize(uploadFileReq.getTotalSize());
             int res = fileMapper.insert(fileRecord);
             if(res!=1){
                 return new CommonResp(Status.SYSTEM_ERROR);
@@ -121,7 +121,7 @@ public class TransferServiceImpl implements TransferService {
             fileRecord.setType(extName);
             fileRecord.setHash(uploadFileReq.getHash());
             fileRecord.setFileId(randomId);
-            fileRecord.setSize(uploadFileReq.getFile().getSize());
+            fileRecord.setSize(uploadFileReq.getTotalSize());
             fileMapper.insert(fileRecord);
             chunkMapper.deleteByHash(uploadFileReq.getHash());
             return new CommonResp(Status.SUCCESS,fileRecord);
@@ -160,36 +160,36 @@ public class TransferServiceImpl implements TransferService {
         return true;
     }
 
-    @Override
-    public CommonResp simpleUpload(UploadFileReq uploadFileReq) {
-        MultipartFile file = uploadFileReq.getFile();
-        File baseFile = new File(FILE_STORE_PATH);
-        if (!baseFile.exists()) {
-            baseFile.mkdirs();
-        }
-        try {
-            String extension = FileUtil.getFileExtension(uploadFileReq.getFileName());//获取拓展名
-            if (extension == null) {
-                return new CommonResp(Status.INVALID_EXTENSION);
-            }
-            String newName = UUIDUtil.generate(FILE_NAME_LENGTH);
-            file.transferTo(new File(baseFile, newName + "." + extension));//存入储
-            com.lldrive.domain.entity.File fileRecord = new com.lldrive.domain.entity.File();//数据库添加信息
-            String filePath = FILE_STORE_PATH + File.separator + newName + "." + extension;
-            fileRecord.setPath(filePath);
-            fileRecord.setType(extension);
-            fileRecord.setHash(uploadFileReq.getHash());
-            fileRecord.setFileId(newName);
-            fileRecord.setSize(uploadFileReq.getFile().getSize());
-            int res = fileMapper.insert(fileRecord);
-            if (res == 1) {
-                return new CommonResp(Status.SUCCESS, fileRecord);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new CommonResp(Status.SYSTEM_ERROR);
-    }
+//    @Override
+//    public CommonResp simpleUpload(UploadFileReq uploadFileReq) {
+//        MultipartFile file = uploadFileReq.getFile();
+//        File baseFile = new File(FILE_STORE_PATH);
+//        if (!baseFile.exists()) {
+//            baseFile.mkdirs();
+//        }
+//        try {
+//            String extension = FileUtil.getFileExtension(uploadFileReq.getFileName());//获取拓展名
+//            if (extension == null) {
+//                return new CommonResp(Status.INVALID_EXTENSION);
+//            }
+//            String newName = UUIDUtil.generate(FILE_NAME_LENGTH);
+//            file.transferTo(new File(baseFile, newName + "." + extension));//存入储
+//            com.lldrive.domain.entity.File fileRecord = new com.lldrive.domain.entity.File();//数据库添加信息
+//            String filePath = FILE_STORE_PATH + File.separator + newName + "." + extension;
+//            fileRecord.setPath(filePath);
+//            fileRecord.setType(extension);
+//            fileRecord.setHash(uploadFileReq.getHash());
+//            fileRecord.setFileId(newName);
+//            fileRecord.setSize(uploadFileReq.getFile().getSize());
+//            int res = fileMapper.insert(fileRecord);
+//            if (res == 1) {
+//                return new CommonResp(Status.SUCCESS, fileRecord);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return new CommonResp(Status.SYSTEM_ERROR);
+//    }
 
     @Override
     public CommonResp fastUpload(UploadFileReq uploadFileReq) {
@@ -211,74 +211,70 @@ public class TransferServiceImpl implements TransferService {
         return new CommonResp(Status.SUCCESS,file);
     }
 
-    @Override
-    public CommonResp newChunkUpload(UploadFileReq uploadFileReq) {
-        return null;
-    }
 
-    public CommonResp chunkUpload(UploadFileReq uploadFileReq){
-        Boolean lastFlag=false;
-        String fileName=uploadFileReq.getFileName();
-//        String parentDir=FILE_STORE_PATH+File.separator+uploadFileReq.getHash()+File.separator;
-        String tempFilename=fileName+"_tmp";
-        //写入临时文件
-        try{
-            File tmpFile=tmpFile(FILE_STORE_PATH,tempFilename,uploadFileReq.getFile(),uploadFileReq.getChunkNumber(),uploadFileReq.getTotalSize(),uploadFileReq.getHash());
-            Integer chunkCount= chunkMapper.chunkCount(uploadFileReq.getHash());
-            if(Objects.equals(chunkCount, uploadFileReq.getTotalChunks())){
-                lastFlag=true;
-            }
-            if(lastFlag){//若已为最后一片
-//                if(!checkHash(tmpFile,uploadFileReq.getHash())){//若hash不匹配
-//                    cleanUp(tmpFile,uploadFileReq.getHash());
-//                    return new CommonResp(Status.HASH_ERROR);
-//                }
-//                if(!renameFile(tmpFile,uploadFileReq.getFileName())) {
-//                    return new CommonResp(Status.SYSTEM_ERROR);
-//                }
-                addNewFile(tmpFile,uploadFileReq.getHash(),uploadFileReq.getTotalSize());
-                return new CommonResp(Status.SUCCESS);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return new CommonResp(Status.CHUNK_SUCCESS);
-    }
-
-    private File tmpFile(String dir,String tmpFileName,MultipartFile file,Integer chunkNumber,Integer totalSize,String fileHash)throws IOException{
-        Long position=((chunkNumber)*CHUNK_SIZE);
-        File tmpDir=new File(dir);
-        File tmpFile=new File(dir,tmpFileName);
-        if(!tmpDir.exists()){
-            tmpDir.mkdirs();
-        }
-        RandomAccessFile raf=new RandomAccessFile(tmpFile,"rw");//读写权限
-        if(raf.length()==0){
-            raf.setLength(totalSize);
-        }
-        //写入分片数据
-        FileChannel fc=raf.getChannel();
-//        MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());//将文件的一部分映射到内存中方便读写
-//        map.put(file.getBytes());//写入
-//        clean(map);
-        ByteBuffer buffer= ByteBuffer.allocate((int) file.getSize());
-        buffer.put(file.getBytes());
-        buffer.flip();
-        fc.position(position);
-        fc.write(buffer);
-        fc.close();
-        raf.close();
-        //记录已完成的分片
-        Chunk chunk=new Chunk();
-        chunk.setChunkNumber(chunkNumber);
-        chunk.setHash(fileHash);
-        chunk.setCurrentChunkSize(file.getSize());
-        int res=chunkMapper.insert(chunk);
-        if(res==1){
-            return tmpFile;
-        }
-        return null;
-    }
+//    public CommonResp chunkUpload(UploadFileReq uploadFileReq){
+//        Boolean lastFlag=false;
+//        String fileName=uploadFileReq.getFileName();
+////        String parentDir=FILE_STORE_PATH+File.separator+uploadFileReq.getHash()+File.separator;
+//        String tempFilename=fileName+"_tmp";
+//        //写入临时文件
+//        try{
+//            File tmpFile=tmpFile(FILE_STORE_PATH,tempFilename,uploadFileReq.getFile(),uploadFileReq.getChunkNumber(),uploadFileReq.getTotalSize(),uploadFileReq.getHash());
+//            Integer chunkCount= chunkMapper.chunkCount(uploadFileReq.getHash());
+//            if(Objects.equals(chunkCount, uploadFileReq.getTotalChunks())){
+//                lastFlag=true;
+//            }
+//            if(lastFlag){//若已为最后一片
+////                if(!checkHash(tmpFile,uploadFileReq.getHash())){//若hash不匹配
+////                    cleanUp(tmpFile,uploadFileReq.getHash());
+////                    return new CommonResp(Status.HASH_ERROR);
+////                }
+////                if(!renameFile(tmpFile,uploadFileReq.getFileName())) {
+////                    return new CommonResp(Status.SYSTEM_ERROR);
+////                }
+//                addNewFile(tmpFile,uploadFileReq.getHash(),uploadFileReq.getTotalSize());
+//                return new CommonResp(Status.SUCCESS);
+//            }
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        return new CommonResp(Status.CHUNK_SUCCESS);
+//    }
+//
+//    private File tmpFile(String dir,String tmpFileName,MultipartFile file,Integer chunkNumber,Integer totalSize,String fileHash)throws IOException{
+//        Long position=((chunkNumber)*CHUNK_SIZE);
+//        File tmpDir=new File(dir);
+//        File tmpFile=new File(dir,tmpFileName);
+//        if(!tmpDir.exists()){
+//            tmpDir.mkdirs();
+//        }
+//        RandomAccessFile raf=new RandomAccessFile(tmpFile,"rw");//读写权限
+//        if(raf.length()==0){
+//            raf.setLength(totalSize);
+//        }
+//        //写入分片数据
+//        FileChannel fc=raf.getChannel();
+////        MappedByteBuffer map=fc.map(FileChannel.MapMode.READ_WRITE,position,file.getSize());//将文件的一部分映射到内存中方便读写
+////        map.put(file.getBytes());//写入
+////        clean(map);
+//        ByteBuffer buffer= ByteBuffer.allocate((int) file.getSize());
+//        buffer.put(file.getBytes());
+//        buffer.flip();
+//        fc.position(position);
+//        fc.write(buffer);
+//        fc.close();
+//        raf.close();
+//        //记录已完成的分片
+//        Chunk chunk=new Chunk();
+//        chunk.setChunkNumber(chunkNumber);
+//        chunk.setHash(fileHash);
+//        chunk.setCurrentChunkSize(file.getSize());
+//        int res=chunkMapper.insert(chunk);
+//        if(res==1){
+//            return tmpFile;
+//        }
+//        return null;
+//    }
 
     private Boolean checkHash(File file,String hash) throws IOException{//检查MD5值
         FileInputStream fis=new FileInputStream(file);
@@ -290,29 +286,29 @@ public class TransferServiceImpl implements TransferService {
         return false;
     }
 
-    private void cleanUp(File file,String hash){//删除已有分片记录
-        if(file.exists()){
-            file.delete();
-        }
-        int res=chunkMapper.deleteByHash(hash);
-    }
-
-    private boolean renameFile(File toBeRenamed, String newName) {
-        // 检查要重命名的文件是否存在，是否是文件
-        if (!toBeRenamed.exists() || toBeRenamed.isDirectory()) {
-            return false;
-        }
-        String parentPath = toBeRenamed.getParent();
-        File newFile = new File(parentPath + File.separatorChar + newName);
-        // 如果存在, 先删除
-        if (newFile.exists()) {
-            newFile.delete();
-        }
-        boolean res=toBeRenamed.renameTo(newFile);
-        return res;
-    }
-
-
+//    private void cleanUp(File file,String hash){//删除已有分片记录
+//        if(file.exists()){
+//            file.delete();
+//        }
+//        int res=chunkMapper.deleteByHash(hash);
+//    }
+//
+//    private boolean renameFile(File toBeRenamed, String newName) {
+//        // 检查要重命名的文件是否存在，是否是文件
+//        if (!toBeRenamed.exists() || toBeRenamed.isDirectory()) {
+//            return false;
+//        }
+//        String parentPath = toBeRenamed.getParent();
+//        File newFile = new File(parentPath + File.separatorChar + newName);
+//        // 如果存在, 先删除
+//        if (newFile.exists()) {
+//            newFile.delete();
+//        }
+//        boolean res=toBeRenamed.renameTo(newFile);
+//        return res;
+//    }
+//
+//
     public boolean addNewFile(File file,String hash,Integer totalSize){//数据库中添加文件记录
         com.lldrive.domain.entity.File fileRecord=new com.lldrive.domain.entity.File();
         fileRecord.setFileId(UUIDUtil.generate(UUID_LENGTH));

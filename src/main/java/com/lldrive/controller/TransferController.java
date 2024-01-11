@@ -1,5 +1,6 @@
 package com.lldrive.controller;
 
+import com.alibaba.druid.support.spring.stat.annotation.Stat;
 import com.lldrive.domain.entity.File;
 import com.lldrive.domain.entity.User;
 import com.lldrive.domain.entity.UserFile;
@@ -39,7 +40,7 @@ public class TransferController {
     @PostMapping("/upload")
     public CommonResp upload(UploadFileReq uploadFileReq) {
         CommonResp resp = transferService.upload(uploadFileReq);
-        if (!Objects.equals(resp.getStatusCode(), Status.SUCCESS.getCode())) {
+        if (!Objects.equals(resp.getStatusCode(), Status.SUCCESS.getCode())&&!Objects.equals(resp.getStatusCode(),Status.FAST_UPLOAD_SUCCESS.getCode())) {
             return resp;
         }
         File file = (File) resp.getData();
@@ -48,14 +49,18 @@ public class TransferController {
             return addResp;
         }
         Map<String,String> res=new HashMap<>();
+        if(Objects.equals(resp.getStatusCode(), Status.FAST_UPLOAD_SUCCESS.getCode())){
+            res.put("status","upload_seconds");
+            return new CommonResp(Status.SUCCESS,res);
+        }
         res.put("status","upload_finish");
         return new CommonResp(Status.SUCCESS,res);
     }
 
-    @GetMapping("/upload")
-    public CommonResp fastUpload(UploadFileReq uploadFileReq){
-        return transferService.fastUpload(uploadFileReq);
-    }
+//    @GetMapping("/upload")
+//    public CommonResp fastUpload(UploadFileReq uploadFileReq){
+//        return transferService.fastUpload(uploadFileReq);
+//    }
 
     @GetMapping("/download")
     public CommonResp download(@RequestParam("user_file_id")String userFileId,HttpServletResponse resp){
