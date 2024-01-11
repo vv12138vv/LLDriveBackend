@@ -9,6 +9,8 @@ public class ShareFileReq {
     private String userFileId;
     @JsonProperty("code")
     private String code;
+    @JsonProperty("valid_type")
+    private Integer validType;
     @JsonProperty("expire_time")
     private Long expireTime;
 }

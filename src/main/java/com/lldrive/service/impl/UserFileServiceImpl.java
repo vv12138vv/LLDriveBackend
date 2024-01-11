@@ -275,7 +275,6 @@ public class UserFileServiceImpl implements UserFileService {
 //            int res=userFileMapper.updateUserFileDeleted(userFileId,true);
             int res=userFileMapper.deleteById(userFile.getId());
             if(res==1){
-                repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
                 return new CommonResp(Status.SUCCESS);
             }
             return new CommonResp(Status.SYSTEM_ERROR);
@@ -300,8 +299,7 @@ public class UserFileServiceImpl implements UserFileService {
         }
 //        userFileMapper.updateUserFileDeleted(userFileId,true);
         userFileMapper.deleteById(userFile.getId());
-        this.updateDirSize(userFileId,false);
-        repoMapper.updateCurCapacity(user.getRepoId(), -userFile.getSize());
+//        this.updateDirSize(userFileId,false);
         return new CommonResp(Status.SUCCESS);
     }
 
