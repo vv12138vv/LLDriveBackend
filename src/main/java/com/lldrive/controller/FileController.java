@@ -43,7 +43,7 @@ public class FileController {
             return userResp;
         }
         User user=(User) userResp.getData();
-        if(userFileListReq.getFileName()==null||userFileListReq.equals("")){
+        if(userFileListReq.getFileName()==null||userFileListReq.getFileName().equals("")){
             if(userFileListReq.getType()!=null&&!(userFileListReq.getType().equals(""))) {
                 Integer type = Integer.parseInt(userFileListReq.getType());
                 return userFileService.listUserFilesByType(user, type, pageNo, pageSize);

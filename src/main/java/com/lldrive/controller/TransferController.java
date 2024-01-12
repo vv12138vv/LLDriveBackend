@@ -133,6 +133,7 @@ public class TransferController {
             e.printStackTrace();
             return new CommonResp(Status.SYSTEM_ERROR);
         }
+        shareService.updateSharedCount(sharedFileId);
         return new CommonResp(Status.SUCCESS);
     }
 }

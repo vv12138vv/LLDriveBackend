@@ -90,6 +90,9 @@ public class TransferServiceImpl implements TransferService {
             com.lldrive.domain.entity.File fileRecord = new com.lldrive.domain.entity.File();//数据库添加信息
             String randomId=UUIDUtil.generate(FILE_NAME_LENGTH);
             String fileName=savePath+File.separator+randomId+'.'+extName;
+            File tempName=new File(fullFileName);
+            File newName=new File(fileName);
+            tempName.renameTo(newName);
             fileRecord.setPath(fileName);
             fileRecord.setType(extName);
             fileRecord.setHash(uploadFileReq.getHash());
